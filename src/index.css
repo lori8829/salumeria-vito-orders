@@ -2,41 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Salumeria Vito Design System 
+   Palette: Rosso tradizionale #a61e1a, Nero #141300, Crema #f1efe9
+   UI: Card arrotondate, ombre leggere, mobile-first
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Brand Colors - Salumeria Vito */
+    --salumeria-red: 3 82% 37%;      /* #a61e1a */
+    --salumeria-dark: 60 100% 4%;    /* #141300 */
+    --salumeria-cream: 40 23% 94%;   /* #f1efe9 */
+    
+    /* Semantic Tokens */
+    --background: 40 23% 94%;        /* Crema per sfondo caldo */
+    --foreground: 60 100% 4%;        /* Nero per testo */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;               /* Bianco per card */
+    --card-foreground: 60 100% 4%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 60 100% 4%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 3 82% 37%;            /* Rosso Salumeria */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 40 23% 94%;         /* Crema */
+    --secondary-foreground: 60 100% 4%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 40 15% 88%;             /* Crema più scura */
+    --muted-foreground: 60 20% 25%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 3 82% 37%;             /* Rosso per accenti */
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 40 15% 85%;            /* Bordi delicati */
+    --input: 40 15% 85%;
+    --ring: 3 82% 37%;               /* Focus ring rosso */
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;               /* Arrotondamenti più generosi */
+    
+    /* Custom gradients */
+    --gradient-warm: linear-gradient(135deg, hsl(var(--salumeria-cream)), hsl(40 30% 96%));
+    --gradient-brand: linear-gradient(135deg, hsl(var(--salumeria-red)), hsl(3 65% 45%));
+    
+    /* Shadows */
+    --shadow-soft: 0 2px 8px -2px hsl(var(--salumeria-dark) / 0.1);
+    --shadow-card: 0 4px 16px -4px hsl(var(--salumeria-dark) / 0.15);
+    --shadow-elevated: 0 8px 32px -8px hsl(var(--salumeria-dark) / 0.2);
 
     --sidebar-background: 0 0% 98%;
 
