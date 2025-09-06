@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/Header";
-import { Plus, Edit, Trash2, FileText, Archive, Clock, User } from "lucide-react";
+import { OrdersWindow } from "@/components/OrdersWindow";
+import { Plus, Trash2, FileText, Archive, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 // Mock data - sostituirà con dati Supabase
 const mockMenuItems = [
@@ -16,58 +18,51 @@ const mockMenuItems = [
   { id: "3", name: "Cannelloni", description: "", price_cents: 580 }
 ];
 
-const mockOrders = [
-  {
-    id: "ord_1",
-    pickup_time: "12:30",
-    customer: "Mario Rossi",
-    total_cents: 1250,
-    status: "in_attesa"
-  },
-  {
-    id: "ord_2", 
-    pickup_time: "13:00",
-    customer: "Anna Bianchi",
-    total_cents: 850,
-    status: "in_attesa"
-  }
-];
-
 interface MenuItem {
   id: string;
   name: string;
-  description: string;
   price_cents: number;
 }
 
 const Admin = () => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>(mockMenuItems);
-  const [orders, setOrders] = useState(mockOrders);
-  const [newItem, setNewItem] = useState({ name: "", description: "", price_eur: "" });
+  const [newItem, setNewItem] = useState({ name: "" });
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Auto-archive menu at 23:00 every day
+  useEffect(() => {
+    const checkAutoArchive = () => {
+      const now = new Date();
+      if (now.getHours() === 23 && now.getMinutes() === 0) {
+        handleArchiveMenu();
+      }
+    };
+
+    const interval = setInterval(checkAutoArchive, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, []);
 
   const handleAddItem = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!newItem.name || !newItem.price_eur) {
+    if (!newItem.name) {
       toast({
         title: "Errore",
-        description: "Nome e prezzo sono obbligatori",
+        description: "Il nome del piatto è obbligatorio",
         variant: "destructive"
       });
       return;
     }
 
-    const price_cents = Math.round(parseFloat(newItem.price_eur) * 100);
     const item: MenuItem = {
       id: Date.now().toString(),
       name: newItem.name,
-      description: newItem.description,
-      price_cents
+      price_cents: 0 // Price will be set by customer or admin later
     };
 
     setMenuItems(prev => [...prev, item]);
-    setNewItem({ name: "", description: "", price_eur: "" });
+    setNewItem({ name: "" });
     
     toast({
       title: "Piatto aggiunto!",
@@ -98,25 +93,24 @@ const Admin = () => {
     });
   };
 
-  const markOrderCompleted = (orderId: string) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId 
-        ? { ...order, status: "completato" }
-        : order
-    ));
-    toast({
-      title: "Ordine completato",
-      description: "L'ordine è stato segnato come completato"
-    });
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <Header 
-        title="Pannello Proprietario"
-        subtitle="Gestione menù e ordini"
-        logo="👨‍🍳"
-      />
+      <div className="flex justify-between items-center p-4 border-b border-border">
+        <Header 
+          title="Pannello Proprietario"
+          subtitle="Gestione menù e ordini"
+          logo="👨‍🍳"
+        />
+        <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+          <LogOut className="h-4 w-4" />
+          Esci
+        </Button>
+      </div>
       
       <main className="container mx-auto px-4 py-8 space-y-8">
         {/* Add Menu Item Form */}
@@ -129,44 +123,22 @@ const Admin = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleAddItem} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
+              <div className="flex gap-4 items-end">
+                <div className="flex-1">
                   <Label htmlFor="name">Nome piatto *</Label>
                   <Input
                     id="name"
                     value={newItem.name}
-                    onChange={(e) => setNewItem(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) => setNewItem({ name: e.target.value })}
                     placeholder="es. Lasagne della nonna"
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="description">Descrizione (opzionale)</Label>
-                  <Input
-                    id="description"
-                    value={newItem.description}
-                    onChange={(e) => setNewItem(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Ingredienti speciali..."
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="price">Prezzo (€) *</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={newItem.price_eur}
-                    onChange={(e) => setNewItem(prev => ({ ...prev, price_eur: e.target.value }))}
-                    placeholder="6.50"
-                    required
-                  />
-                </div>
+                <Button type="submit" className="bg-primary hover:bg-primary/90">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Aggiungi piatto
+                </Button>
               </div>
-              <Button type="submit" className="bg-primary hover:bg-primary/90">
-                <Plus className="h-4 w-4 mr-2" />
-                Aggiungi piatto
-              </Button>
             </form>
           </CardContent>
         </Card>
@@ -187,14 +159,8 @@ const Admin = () => {
                   <div key={item.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
                     <div className="flex-1">
                       <h3 className="font-semibold">{item.name}</h3>
-                      {item.description && (
-                        <p className="text-sm text-muted-foreground">{item.description}</p>
-                      )}
                     </div>
                     <div className="flex items-center gap-3">
-                      <Badge variant="secondary" className="bg-primary text-primary-foreground">
-                        €{(item.price_cents / 100).toFixed(2)}
-                      </Badge>
                       <Button
                         size="sm"
                         variant="outline"
@@ -223,58 +189,8 @@ const Admin = () => {
                 <Archive className="h-4 w-4 mr-2" />
                 Archivia menù
               </Button>
+              <OrdersWindow />
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Today's Orders */}
-        <Card className="bg-card shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-primary" />
-              Ordini di oggi
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {orders.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">
-                Nessun ordine per oggi
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {orders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-semibold">{order.pickup_time}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span>{order.customer}</span>
-                      </div>
-                      <Badge variant="secondary" className="bg-primary text-primary-foreground">
-                        €{(order.total_cents / 100).toFixed(2)}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant={order.status === "completato" ? "default" : "outline"}>
-                        {order.status === "completato" ? "Completato" : "In attesa"}
-                      </Badge>
-                      {order.status !== "completato" && (
-                        <Button
-                          size="sm"
-                          onClick={() => markOrderCompleted(order.id)}
-                          className="bg-primary hover:bg-primary/90"
-                        >
-                          Completa
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </CardContent>
         </Card>
       </main>
