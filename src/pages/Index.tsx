@@ -3,27 +3,25 @@ import { Header } from "@/components/Header";
 import { MenuCard } from "@/components/MenuCard";
 import { CartSummary } from "@/components/CartSummary";
 import { EmptyMenu } from "@/components/EmptyMenu";
+import { AdminButton } from "@/components/AdminButton";
 
-// Mock data per demo - sostituirà con dati Supabase
+// Mock data rosticceria tradizionale - sostituirà con dati Supabase
 const mockMenuItems = [
-  {
-    id: "1",
-    name: "Panino con Prosciutto di Parma",
-    description: "Prosciutto di Parma DOP 18 mesi, mozzarella di bufala, rucola e pomodorini",
-    price_cents: 850
-  },
-  {
-    id: "2", 
-    name: "Tagliere Misto",
-    description: "Selezione di salumi e formaggi locali, miele millefiori e mostarda di Cremona",
-    price_cents: 1200
-  },
-  {
-    id: "3",
-    name: "Focaccia Gourmet",
-    description: "Focaccia artigianale con mortadella Bologna IGP, stracciatella e pistacchi",
-    price_cents: 700
-  }
+  { id: "1", name: "Vincisgrassi", price_cents: 650 },
+  { id: "2", name: "Lasagne bianche con verdure", price_cents: 600 },
+  { id: "3", name: "Cannelloni", price_cents: 580 },
+  { id: "4", name: "Pasta fredda", price_cents: 520 },
+  { id: "5", name: "Minestrone", price_cents: 450 },
+  { id: "6", name: "Cous cous con verdure", price_cents: 550 },
+  { id: "7", name: "Insalata di lenticchie", price_cents: 480 },
+  { id: "8", name: "Insalata di riso", price_cents: 480 },
+  { id: "9", name: "Parmigiana di melanzane", price_cents: 620 },
+  { id: "10", name: "Patate arrosto", price_cents: 400 },
+  { id: "11", name: "Verdure impanate", price_cents: 450 },
+  { id: "12", name: "Coniglio in porchetta", price_cents: 750 },
+  { id: "13", name: "Roastbeef di vitello condito", price_cents: 820 },
+  { id: "14", name: "Verdure gratinate", price_cents: 380 },
+  { id: "15", name: "Zuppa di fagioli borlotti", price_cents: 420 }
 ];
 
 interface CartItem {
@@ -63,6 +61,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <AdminButton />
+      
       <Header 
         title="Salumeria Vito"
         subtitle="Menù del giorno"
@@ -83,7 +83,7 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
               {mockMenuItems.map((item) => (
                 <MenuCard
                   key={item.id}
