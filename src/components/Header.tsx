@@ -1,18 +1,18 @@
 import { Badge } from "@/components/ui/badge";
+import logo from "@/assets/salumeria-vito-logo.png";
 
 interface HeaderProps {
   title: string;
   subtitle: string;
-  logo: string;
 }
 
-export function Header({ title, subtitle, logo }: HeaderProps) {
+export function Header({ title, subtitle }: HeaderProps) {
   return (
     <header className="bg-gradient-warm border-b border-border">
       <div className="container mx-auto px-4 py-6">
         <div className="text-center">
           <div className="flex items-center justify-center gap-3 mb-2">
-            <span className="text-4xl">{logo}</span>
+            <img src={logo} alt="Salumeria Vito Logo" className="h-12 w-12" />
             <h1 className="text-3xl md:text-4xl font-bold text-foreground">
               {title}
             </h1>

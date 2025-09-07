@@ -167,7 +167,6 @@ const Admin = () => {
         <Header 
           title="Pannello Proprietario"
           subtitle="Gestione menù e ordini"
-          logo="👨‍🍳"
         />
         <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
           <LogOut className="h-4 w-4" />

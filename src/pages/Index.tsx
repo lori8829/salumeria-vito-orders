@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { MenuCard } from "@/components/MenuCard";
 import { CartSummary } from "@/components/CartSummary";
 import { EmptyMenu } from "@/components/EmptyMenu";
+import { AdminButton } from "@/components/AdminButton";
 
 
 // Mock data rosticceria tradizionale - sostituirà con dati Supabase
@@ -61,11 +62,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <AdminButton />
       
       <Header 
         title="Salumeria Vito"
         subtitle="Menù del giorno"
-        logo="🧀"
       />
       
       <main className="container mx-auto px-4 py-8 pb-40">
