@@ -68,7 +68,7 @@ const Index = () => {
         logo="🧀"
       />
       
-      <main className="container mx-auto px-4 py-8 pb-32">
+      <main className="container mx-auto px-4 py-8 pb-40">
         {mockMenuItems.length === 0 ? (
           <EmptyMenu />
         ) : (

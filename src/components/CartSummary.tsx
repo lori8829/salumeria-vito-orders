@@ -17,7 +17,6 @@ interface CartSummaryProps {
 
 export function CartSummary({ items, onCheckout }: CartSummaryProps) {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = items.reduce((sum, item) => sum + (item.quantity * item.price_cents), 0);
   
   if (totalItems === 0) {
     return null;
@@ -41,21 +40,13 @@ export function CartSummary({ items, onCheckout }: CartSummaryProps) {
             {items.map((item) => (
               <div key={item.id} className="flex justify-between items-center text-sm">
                 <span className="font-medium">{item.name}</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">×{item.quantity}</span>
-                  <span className="font-semibold">
-                    €{((item.price_cents * item.quantity) / 100).toFixed(2)}
-                  </span>
-                </div>
+                <span className="text-muted-foreground">×{item.quantity}</span>
               </div>
             ))}
           </div>
           
-          {/* Total and CTA */}
-          <div className="flex items-center justify-between pt-3 border-t border-border">
-            <div className="text-lg font-bold">
-              Totale: €{(totalPrice / 100).toFixed(2)}
-            </div>
+          {/* CTA */}
+          <div className="flex justify-center pt-3 border-t border-border">
             <Button 
               onClick={onCheckout}
               className="bg-primary hover:bg-primary/90 text-primary-foreground px-6"

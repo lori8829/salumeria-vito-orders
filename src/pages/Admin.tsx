@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Header } from "@/components/Header";
 import { OrdersWindow } from "@/components/OrdersWindow";
 import { Plus, Trash2, FileText, Archive, LogOut } from "lucide-react";
@@ -11,11 +12,11 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
-// Mock data - sostituirà con dati Supabase
+// Mock data - will be replaced with Supabase data
 const mockMenuItems = [
-  { id: "1", name: "Vincisgrassi", description: "", price_cents: 650 },
-  { id: "2", name: "Lasagne bianche con verdure", description: "", price_cents: 600 },
-  { id: "3", name: "Cannelloni", description: "", price_cents: 580 }
+  { id: "1", name: "Vincisgrassi", price_cents: 650 },
+  { id: "2", name: "Lasagne bianche con verdure", price_cents: 600 },
+  { id: "3", name: "Cannelloni", price_cents: 580 }
 ];
 
 interface MenuItem {
@@ -24,11 +25,35 @@ interface MenuItem {
   price_cents: number;
 }
 
+interface Dish {
+  id: string;
+  name: string;
+}
+
 const Admin = () => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>(mockMenuItems);
-  const [newItem, setNewItem] = useState({ name: "" });
+  const [dishes, setDishes] = useState<Dish[]>([]);
+  const [newItem, setNewItem] = useState({ name: "", selectedDish: "" });
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Load all dishes from database
+  useEffect(() => {
+    loadDishes();
+  }, []);
+
+  const loadDishes = async () => {
+    const { data, error } = await supabase
+      .from('dishes')
+      .select('*')
+      .order('name');
+    
+    if (error) {
+      console.error('Error loading dishes:', error);
+    } else {
+      setDishes(data || []);
+    }
+  };
 
   // Auto-archive menu at 23:00 every day
   useEffect(() => {
@@ -43,13 +68,51 @@ const Admin = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleAddItem = (e: React.FormEvent) => {
+  const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!newItem.name) {
+    let dishName = "";
+    
+    if (newItem.selectedDish) {
+      // Use selected dish from dropdown
+      const selectedDish = dishes.find(d => d.id === newItem.selectedDish);
+      if (selectedDish) {
+        dishName = selectedDish.name;
+      }
+    } else if (newItem.name) {
+      // Create new dish
+      dishName = newItem.name;
+      
+      // Save new dish to database
+      const { data: newDish, error } = await supabase
+        .from('dishes')
+        .insert({ name: dishName })
+        .select()
+        .single();
+      
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          toast({
+            title: "Piatto già esistente",
+            description: "Questo piatto è già presente nel database",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Errore",
+            description: "Errore durante il salvataggio del piatto",
+            variant: "destructive"
+          });
+        }
+        return;
+      }
+      
+      // Reload dishes to include the new one
+      await loadDishes();
+    } else {
       toast({
         title: "Errore",
-        description: "Il nome del piatto è obbligatorio",
+        description: "Seleziona un piatto dal menù o inserisci un nuovo nome",
         variant: "destructive"
       });
       return;
@@ -57,12 +120,12 @@ const Admin = () => {
 
     const item: MenuItem = {
       id: Date.now().toString(),
-      name: newItem.name,
+      name: dishName,
       price_cents: 0 // Price will be set by customer or admin later
     };
 
     setMenuItems(prev => [...prev, item]);
-    setNewItem({ name: "" });
+    setNewItem({ name: "", selectedDish: "" });
     
     toast({
       title: "Piatto aggiunto!",
@@ -123,22 +186,40 @@ const Admin = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleAddItem} className="space-y-4">
-              <div className="flex gap-4 items-end">
-                <div className="flex-1">
-                  <Label htmlFor="name">Nome piatto *</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="existingDish">Scegli piatto esistente</Label>
+                  <Select 
+                    value={newItem.selectedDish} 
+                    onValueChange={(value) => setNewItem(prev => ({ ...prev, selectedDish: value, name: "" }))}
+                  >
+                    <SelectTrigger className="bg-background border-border">
+                      <SelectValue placeholder="Seleziona un piatto..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border-border z-50">
+                      {dishes.map((dish) => (
+                        <SelectItem key={dish.id} value={dish.id}>
+                          {dish.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="newDish">Oppure inserisci nuovo piatto</Label>
                   <Input
-                    id="name"
+                    id="newDish"
                     value={newItem.name}
-                    onChange={(e) => setNewItem({ name: e.target.value })}
+                    onChange={(e) => setNewItem(prev => ({ ...prev, name: e.target.value, selectedDish: "" }))}
                     placeholder="es. Lasagne della nonna"
-                    required
+                    disabled={!!newItem.selectedDish}
                   />
                 </div>
-                <Button type="submit" className="bg-primary hover:bg-primary/90">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Aggiungi piatto
-                </Button>
               </div>
+              <Button type="submit" className="bg-primary hover:bg-primary/90">
+                <Plus className="h-4 w-4 mr-2" />
+                Aggiungi piatto
+              </Button>
             </form>
           </CardContent>
         </Card>

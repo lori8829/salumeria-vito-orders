@@ -14,7 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      dishes: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      menu_items: {
+        Row: {
+          created_at: string
+          date: string
+          dish_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          dish_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          dish_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_dish_id_fkey"
+            columns: ["dish_id"]
+            isOneToOne: false
+            referencedRelation: "dishes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

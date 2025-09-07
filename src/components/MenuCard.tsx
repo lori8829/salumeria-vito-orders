@@ -17,20 +17,15 @@ interface MenuCardProps {
 }
 
 export function MenuCard({ item, quantity, onIncrement, onDecrement }: MenuCardProps) {
-  const price = (item.price_cents / 100).toFixed(2);
-  
   return (
     <Card className="bg-card shadow-card hover:shadow-elevated transition-all duration-200 border-border">
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
-          {/* Name and price */}
+          {/* Name only */}
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-foreground mb-1">
+            <h3 className="text-lg font-semibold text-foreground">
               {item.name}
             </h3>
-            <Badge variant="secondary" className="bg-primary text-primary-foreground font-bold">
-              €{price}
-            </Badge>
           </div>
 
           {/* Quantity controls */}
