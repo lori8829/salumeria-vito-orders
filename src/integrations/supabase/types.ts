@@ -61,6 +61,65 @@ export type Database = {
           },
         ]
       }
+      order_items: {
+        Row: {
+          created_at: string
+          dish_name: string
+          id: string
+          order_id: string
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          dish_name: string
+          id?: string
+          order_id: string
+          quantity?: number
+        }
+        Update: {
+          created_at?: string
+          dish_name?: string
+          id?: string
+          order_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          date: string
+          id: string
+          status: string
+          total_items: number
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          status?: string
+          total_items?: number
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          status?: string
+          total_items?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

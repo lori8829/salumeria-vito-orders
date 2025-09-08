@@ -223,8 +223,58 @@ const Admin = () => {
   };
 
   const handlePrintMenu = () => {
+    // Generate HTML content for menu
+    const menuHTML = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Menù Salumeria Vito - ${new Date().toLocaleDateString('it-IT')}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .logo { width: 80px; height: 80px; margin: 0 auto 20px; }
+            h1 { color: #dc2626; margin-bottom: 10px; }
+            .date { color: #666; margin-bottom: 30px; }
+            .menu-item { padding: 15px; border-bottom: 1px solid #eee; }
+            .menu-item:last-child { border-bottom: none; }
+            .item-name { font-size: 18px; font-weight: bold; }
+            @media print { body { margin: 20px; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <img src="/lovable-uploads/de909bd5-2e0a-47eb-bb4c-d284d67726cb.png" alt="Salumeria Vito" class="logo" />
+            <h1>Salumeria Vito</h1>
+            <p class="date">Menù del ${new Date().toLocaleDateString('it-IT', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}</p>
+          </div>
+          <div class="menu">
+            ${menuItems.map(item => `
+              <div class="menu-item">
+                <div class="item-name">${item.name}</div>
+              </div>
+            `).join('')}
+          </div>
+        </body>
+      </html>
+    `;
+
+    // Create and open print window
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(menuHTML);
+      printWindow.document.close();
+      setTimeout(() => {
+        printWindow.print();
+      }, 250);
+    }
+
     toast({
-      title: "PDF generato",
+      title: "Stampa avviata",
       description: "Il menù è pronto per la stampa"
     });
   };
@@ -375,10 +425,12 @@ const Admin = () => {
                 <Archive className="h-4 w-4 mr-2" />
                 Archivia menù
               </Button>
-              <OrdersWindow />
             </div>
           </CardContent>
         </Card>
+
+        {/* Orders Management */}
+        <OrdersWindow />
       </main>
     </div>
   );

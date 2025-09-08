@@ -84,9 +84,75 @@ const Cliente = () => {
     });
   };
 
-  const handleCheckout = () => {
-    // TODO: Navigate to checkout
-    console.log("Proceeding to checkout with:", cartItems);
+  const handleCheckout = async () => {
+    try {
+      // Create order in database
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          total_items: cartItems.reduce((sum, item) => sum + item.quantity, 0)
+        })
+        .select()
+        .single();
+
+      if (orderError) {
+        console.error('Error creating order:', orderError);
+        return;
+      }
+
+      // Create order items
+      const orderItems = cartItems.map(item => ({
+        order_id: orderData.id,
+        dish_name: item.name,
+        quantity: item.quantity
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) {
+        console.error('Error creating order items:', itemsError);
+        return;
+      }
+
+      // Generate order summary image
+      try {
+        const response = await fetch(`https://vycwklwugmrndknqepsy.supabase.co/functions/v1/generate-order-image`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5Y3drbHd1Z21ybmRrbnFlcHN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcxOTUzNDQsImV4cCI6MjA3Mjc3MTM0NH0.RIabNiPRscYXpu4_jnwBRF62NkxYZ-ckSRWdNsJpV14`,
+          },
+          body: JSON.stringify({
+            orderItems: cartItems,
+            orderDate: new Date().toLocaleDateString('it-IT')
+          }),
+        });
+
+        if (response.ok) {
+          const { image } = await response.json();
+          
+          // Create download link for the image
+          const link = document.createElement('a');
+          link.href = image;
+          link.download = `ordine-${orderData.id}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      } catch (imageError) {
+        console.error('Error generating order image:', imageError);
+      }
+
+      // Clear cart
+      setCart({});
+      alert('Ordine creato con successo! L\'immagine riepilogativa è stata scaricata.');
+      
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      alert('Errore durante la creazione dell\'ordine');
+    }
   };
 
   if (loading) {
