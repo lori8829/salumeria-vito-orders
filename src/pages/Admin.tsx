@@ -7,17 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Header } from "@/components/Header";
 import { OrdersWindow } from "@/components/OrdersWindow";
-import { Plus, Trash2, FileText, Archive, LogOut } from "lucide-react";
+import { Plus, Trash2, FileText, Archive, LogOut, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
-// Mock data - will be replaced with Supabase data
-const mockMenuItems = [
-  { id: "1", name: "Vincisgrassi", price_cents: 650 },
-  { id: "2", name: "Lasagne bianche con verdure", price_cents: 600 },
-  { id: "3", name: "Cannelloni", price_cents: 580 }
-];
 
 interface MenuItem {
   id: string;
@@ -31,15 +26,16 @@ interface Dish {
 }
 
 const Admin = () => {
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(mockMenuItems);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [newItem, setNewItem] = useState({ name: "", selectedDish: "" });
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Load all dishes from database
+  // Load all dishes and today's menu from database
   useEffect(() => {
     loadDishes();
+    loadTodaysMenu();
   }, []);
 
   const loadDishes = async () => {
@@ -52,6 +48,32 @@ const Admin = () => {
       console.error('Error loading dishes:', error);
     } else {
       setDishes(data || []);
+    }
+  };
+
+  const loadTodaysMenu = async () => {
+    const today = new Date().toISOString().split('T')[0];
+    
+    const { data, error } = await supabase
+      .from('menu_items')
+      .select(`
+        id,
+        dishes (
+          id,
+          name
+        )
+      `)
+      .eq('date', today);
+    
+    if (error) {
+      console.error('Error loading menu items:', error);
+    } else {
+      const formattedItems = data?.map(item => ({
+        id: item.id,
+        name: item.dishes?.name || 'Piatto sconosciuto',
+        price_cents: 0
+      })) || [];
+      setMenuItems(formattedItems);
     }
   };
 
@@ -118,22 +140,81 @@ const Admin = () => {
       return;
     }
 
-    const item: MenuItem = {
-      id: Date.now().toString(),
-      name: dishName,
-      price_cents: 0 // Price will be set by customer or admin later
-    };
-
-    setMenuItems(prev => [...prev, item]);
+    // Add to today's menu in database
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Find the dish ID
+    let dishId = "";
+    if (newItem.selectedDish) {
+      dishId = newItem.selectedDish;
+    } else {
+      // Find the newly created dish
+      const dish = dishes.find(d => d.name === dishName);
+      if (dish) {
+        dishId = dish.id;
+      }
+    }
+    
+    if (dishId) {
+      const { data: menuItem, error: menuError } = await supabase
+        .from('menu_items')
+        .insert({
+          dish_id: dishId,
+          date: today
+        })
+        .select(`
+          id,
+          dishes (
+            id,
+            name
+          )
+        `)
+        .single();
+      
+      if (menuError) {
+        toast({
+          title: "Errore",
+          description: "Errore durante l'aggiunta al menù",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Add to local state
+      const newMenuItem = {
+        id: menuItem.id,
+        name: menuItem.dishes?.name || dishName,
+        price_cents: 0
+      };
+      
+      setMenuItems(prev => [...prev, newMenuItem]);
+    }
+    
     setNewItem({ name: "", selectedDish: "" });
     
     toast({
       title: "Piatto aggiunto!",
-      description: `${item.name} è stato aggiunto al menù`
+      description: `${dishName} è stato aggiunto al menù`
     });
   };
 
-  const handleDeleteItem = (id: string) => {
+  const handleDeleteItem = async (id: string) => {
+    // Delete from database
+    const { error } = await supabase
+      .from('menu_items')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      toast({
+        title: "Errore",
+        description: "Errore durante la rimozione del piatto",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Remove from local state
     setMenuItems(prev => prev.filter(item => item.id !== id));
     toast({
       title: "Piatto rimosso",
@@ -148,7 +229,24 @@ const Admin = () => {
     });
   };
 
-  const handleArchiveMenu = () => {
+  const handleArchiveMenu = async () => {
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Delete all menu items for today
+    const { error } = await supabase
+      .from('menu_items')
+      .delete()
+      .eq('date', today);
+    
+    if (error) {
+      toast({
+        title: "Errore",
+        description: "Errore durante l'archiviazione del menù",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setMenuItems([]);
     toast({
       title: "Menù archiviato",
@@ -164,10 +262,18 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="flex justify-between items-center p-4 border-b border-border">
-        <Header 
-          title="Pannello Proprietario"
-          subtitle="Gestione menù e ordini"
-        />
+        <div className="flex items-center gap-4">
+          <Link to="/">
+            <Button variant="outline" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Torna alla Home
+            </Button>
+          </Link>
+          <Header 
+            title="Pannello Proprietario"
+            subtitle="Gestione menù e ordini"
+          />
+        </div>
         <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
           <LogOut className="h-4 w-4" />
           Esci
