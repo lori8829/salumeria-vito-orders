@@ -18,6 +18,7 @@ interface MenuItem {
   id: string;
   name: string;
   price_cents: number;
+  has_time_restriction?: boolean;
 }
 
 interface Dish {
@@ -58,6 +59,7 @@ const Admin = () => {
       .from('menu_items')
       .select(`
         id,
+        has_time_restriction,
         dishes (
           id,
           name
@@ -71,7 +73,8 @@ const Admin = () => {
       const formattedItems = data?.map(item => ({
         id: item.id,
         name: item.dishes?.name || 'Piatto sconosciuto',
-        price_cents: 0
+        price_cents: 0,
+        has_time_restriction: item.has_time_restriction || false
       })) || [];
       setMenuItems(formattedItems);
     }
@@ -304,6 +307,34 @@ const Admin = () => {
     });
   };
 
+  const handleTimeRestrictionToggle = async (menuItemId: string, hasRestriction: boolean) => {
+    const { error } = await supabase
+      .from('menu_items')
+      .update({ has_time_restriction: hasRestriction })
+      .eq('id', menuItemId);
+    
+    if (error) {
+      toast({
+        title: "Errore",
+        description: "Errore durante l'aggiornamento dell'orario",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Update local state
+    setMenuItems(prev => prev.map(item => 
+      item.id === menuItemId 
+        ? { ...item, has_time_restriction: hasRestriction }
+        : item
+    ));
+    
+    toast({
+      title: hasRestriction ? "Orario aggiunto" : "Orario rimosso",
+      description: hasRestriction ? "Il piatto avrà il tag ORE 12:00" : "Il tag orario è stato rimosso"
+    });
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
@@ -311,20 +342,20 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="flex justify-between items-center p-4 border-b border-border">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 border-b border-border gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <Link to="/">
             <Button variant="outline" className="flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
               Torna alla Home
             </Button>
           </Link>
-          <Header 
-            title="Pannello Proprietario"
-            subtitle="Gestione menù e ordini"
-          />
+          <div className="text-center md:text-left">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Admin</h1>
+            <p className="text-sm md:text-base text-muted-foreground">Gestione menù e ordini</p>
+          </div>
         </div>
-        <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+        <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2 w-full md:w-auto">
           <LogOut className="h-4 w-4" />
           Esci
         </Button>
@@ -334,14 +365,14 @@ const Admin = () => {
         {/* Add Menu Item Form */}
         <Card className="bg-card shadow-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
               <Plus className="h-5 w-5 text-primary" />
               Aggiungi piatto al menù di oggi
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleAddItem} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <Label htmlFor="existingDish">Scegli piatto esistente</Label>
                   <Select 
@@ -371,7 +402,7 @@ const Admin = () => {
                   />
                 </div>
               </div>
-              <Button type="submit" className="bg-primary hover:bg-primary/90">
+              <Button type="submit" className="bg-primary hover:bg-primary/90 w-full md:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Aggiungi piatto
               </Button>
@@ -392,18 +423,29 @@ const Admin = () => {
             ) : (
               <div className="space-y-3">
                 {menuItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{item.name}</h3>
+                  <div key={item.id} className="flex items-center justify-between p-3 md:p-4 border border-border rounded-lg">
+                    <div className="flex items-center gap-3 flex-1">
+                      <input
+                        type="checkbox"
+                        checked={item.has_time_restriction || false}
+                        onChange={(e) => handleTimeRestrictionToggle(item.id, e.target.checked)}
+                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                      />
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-sm md:text-base">{item.name}</h3>
+                        {item.has_time_restriction && (
+                          <span className="text-xs text-red-600 font-medium">ORE 12:00</span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleDeleteItem(item.id)}
                         className="text-destructive hover:text-destructive"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
                       </Button>
                     </div>
                   </div>
@@ -416,12 +458,12 @@ const Admin = () => {
         {/* Menu Actions */}
         <Card className="bg-card shadow-card">
           <CardContent className="pt-6">
-            <div className="flex flex-wrap gap-3">
-              <Button variant="secondary" onClick={handlePrintMenu}>
+            <div className="flex flex-col md:flex-row gap-3">
+              <Button variant="secondary" onClick={handlePrintMenu} className="w-full md:w-auto">
                 <FileText className="h-4 w-4 mr-2" />
                 Stampa menù (PDF)
               </Button>
-              <Button variant="outline" onClick={handleArchiveMenu}>
+              <Button variant="outline" onClick={handleArchiveMenu} className="w-full md:w-auto">
                 <Archive className="h-4 w-4 mr-2" />
                 Archivia menù
               </Button>

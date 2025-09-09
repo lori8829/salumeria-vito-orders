@@ -11,6 +11,7 @@ interface MenuItem {
   id: string;
   name: string;
   price_cents: number;
+  has_time_restriction?: boolean;
 }
 
 interface CartItem {
@@ -48,6 +49,7 @@ const Cliente = () => {
         .from('menu_items')
         .select(`
           id,
+          has_time_restriction,
           dishes (
             id,
             name
@@ -62,7 +64,8 @@ const Cliente = () => {
         const formattedItems = data?.map(item => ({
           id: item.id,
           name: item.dishes?.name || 'Piatto sconosciuto',
-          price_cents: 0 // No prices for customers
+          price_cents: 0, // No prices for customers
+          has_time_restriction: item.has_time_restriction || false
         })) || [];
         setMenuItems(formattedItems);
       }
@@ -160,7 +163,7 @@ const Cliente = () => {
         subtitle="Menù del giorno - Area Cliente"
       />
       
-      <main className="container mx-auto px-4 py-8 pb-40">
+      <main className="container mx-auto px-4 py-8 pb-32">
         {menuItems.length === 0 ? (
           <EmptyMenu />
         ) : (

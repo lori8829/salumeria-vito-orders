@@ -37,18 +37,21 @@ export type Database = {
           created_at: string
           date: string
           dish_id: string
+          has_time_restriction: boolean
           id: string
         }
         Insert: {
           created_at?: string
           date?: string
           dish_id: string
+          has_time_restriction?: boolean
           id?: string
         }
         Update: {
           created_at?: string
           date?: string
           dish_id?: string
+          has_time_restriction?: boolean
           id?: string
         }
         Relationships: [

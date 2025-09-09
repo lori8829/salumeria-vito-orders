@@ -7,6 +7,7 @@ interface MenuItem {
   id: string;
   name: string;
   price_cents: number;
+  has_time_restriction?: boolean;
 }
 
 interface MenuCardProps {
@@ -21,11 +22,18 @@ export function MenuCard({ item, quantity, onIncrement, onDecrement }: MenuCardP
     <Card className="bg-card shadow-card hover:shadow-elevated transition-all duration-200 border-border">
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
-          {/* Name only */}
+          {/* Name and time badge */}
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-foreground">
-              {item.name}
-            </h3>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-lg font-semibold text-foreground">
+                {item.name}
+              </h3>
+              {item.has_time_restriction && (
+                <Badge variant="destructive" className="bg-destructive text-destructive-foreground text-xs px-2 py-1">
+                  ORE 12:00
+                </Badge>
+              )}
+            </div>
           </div>
 
           {/* Quantity controls */}
