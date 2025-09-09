@@ -3,9 +3,8 @@ import { Header } from "@/components/Header";
 import { MenuCard } from "@/components/MenuCard";
 import { CartSummary } from "@/components/CartSummary";
 import { EmptyMenu } from "@/components/EmptyMenu";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { CustomerInfoDialog } from "@/components/CustomerInfoDialog";
+import { OrderConfirmationDialog } from "@/components/OrderConfirmationDialog";
 import { supabase } from "@/integrations/supabase/client";
 
 interface MenuItem {
@@ -25,6 +24,8 @@ const Cliente = () => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [cart, setCart] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [showCustomerDialog, setShowCustomerDialog] = useState(false);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   
   const cartItems: CartItem[] = menuItems
     .filter(item => cart[item.id] > 0)
@@ -84,13 +85,26 @@ const Cliente = () => {
     });
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
+    setShowCustomerDialog(true);
+  };
+
+  const handleCustomerInfoConfirm = async (customerInfo: {
+    name: string;
+    surname: string;
+    phone: string;
+    pickupTime?: string;
+  }) => {
     try {
       // Create order in database
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
-          total_items: cartItems.reduce((sum, item) => sum + item.quantity, 0)
+          total_items: cartItems.reduce((sum, item) => sum + item.quantity, 0),
+          customer_name: customerInfo.name,
+          customer_surname: customerInfo.surname,
+          customer_phone: customerInfo.phone,
+          pickup_time: customerInfo.pickupTime || null
         })
         .select()
         .single();
@@ -116,38 +130,10 @@ const Cliente = () => {
         return;
       }
 
-      // Generate order summary image
-      try {
-        const response = await fetch(`https://vycwklwugmrndknqepsy.supabase.co/functions/v1/generate-order-image`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5Y3drbHd1Z21ybmRrbnFlcHN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcxOTUzNDQsImV4cCI6MjA3Mjc3MTM0NH0.RIabNiPRscYXpu4_jnwBRF62NkxYZ-ckSRWdNsJpV14`,
-          },
-          body: JSON.stringify({
-            orderItems: cartItems,
-            orderDate: new Date().toLocaleDateString('it-IT')
-          }),
-        });
-
-        if (response.ok) {
-          const { image } = await response.json();
-          
-          // Create download link for the image
-          const link = document.createElement('a');
-          link.href = image;
-          link.download = `ordine-${orderData.id}.png`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        }
-      } catch (imageError) {
-        console.error('Error generating order image:', imageError);
-      }
-
-      // Clear cart
+      // Clear cart and show confirmation
       setCart({});
-      alert('Ordine creato con successo! L\'immagine riepilogativa è stata scaricata.');
+      setShowCustomerDialog(false);
+      setShowConfirmationDialog(true);
       
     } catch (error) {
       console.error('Error during checkout:', error);
@@ -168,14 +154,6 @@ const Cliente = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="flex items-center justify-between p-4 border-b border-border">
-        <Link to="/">
-          <Button variant="outline" className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Torna alla Home
-          </Button>
-        </Link>
-      </div>
       
       <Header 
         title="Salumeria Vito"
@@ -214,6 +192,17 @@ const Cliente = () => {
       <CartSummary 
         items={cartItems}
         onCheckout={handleCheckout}
+      />
+
+      <CustomerInfoDialog
+        isOpen={showCustomerDialog}
+        onClose={() => setShowCustomerDialog(false)}
+        onConfirm={handleCustomerInfoConfirm}
+      />
+
+      <OrderConfirmationDialog
+        isOpen={showConfirmationDialog}
+        onClose={() => setShowConfirmationDialog(false)}
       />
     </div>
   );

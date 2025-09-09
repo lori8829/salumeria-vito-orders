@@ -8,6 +8,7 @@ import Cliente from "./pages/Cliente";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import ArchivedOrders from "./pages/ArchivedOrders";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const App = () => (
@@ -22,6 +23,11 @@ const App = () => (
         <Route path="/admin" element={
           <ProtectedRoute>
             <Admin />
+          </ProtectedRoute>
+        } />
+        <Route path="/archived-orders" element={
+          <ProtectedRoute>
+            <ArchivedOrders />
           </ProtectedRoute>
         } />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

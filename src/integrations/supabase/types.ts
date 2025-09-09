@@ -97,24 +97,36 @@ export type Database = {
         Row: {
           archived_at: string | null
           created_at: string
+          customer_name: string | null
+          customer_phone: string | null
+          customer_surname: string | null
           date: string
           id: string
+          pickup_time: string | null
           status: string
           total_items: number
         }
         Insert: {
           archived_at?: string | null
           created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          customer_surname?: string | null
           date?: string
           id?: string
+          pickup_time?: string | null
           status?: string
           total_items?: number
         }
         Update: {
           archived_at?: string | null
           created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          customer_surname?: string | null
           date?: string
           id?: string
+          pickup_time?: string | null
           status?: string
           total_items?: number
         }

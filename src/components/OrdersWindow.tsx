@@ -3,8 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, Archive, Clock, Package } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface Order {
   id: string;
@@ -12,6 +14,10 @@ interface Order {
   date: string;
   status: string;
   total_items: number;
+  customer_name: string;
+  customer_surname: string;
+  customer_phone: string;
+  pickup_time: string;
   order_items: {
     id: string;
     dish_name: string;
@@ -22,6 +28,7 @@ interface Order {
 const OrdersWindow = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadTodaysOrders();
@@ -39,6 +46,10 @@ const OrdersWindow = () => {
           date,
           status,
           total_items,
+          customer_name,
+          customer_surname,
+          customer_phone,
+          pickup_time,
           order_items (
             id,
             dish_name,
@@ -60,6 +71,26 @@ const OrdersWindow = () => {
       toast.error('Errore nel caricamento degli ordini');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId);
+
+      if (error) {
+        console.error('Error updating order status:', error);
+        toast.error('Errore nell\'aggiornamento dello stato');
+      } else {
+        toast.success('Stato dell\'ordine aggiornato');
+        loadTodaysOrders();
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Errore nell\'aggiornamento dello stato');
     }
   };
 
@@ -128,9 +159,19 @@ const OrdersWindow = () => {
   return (
     <Card className="bg-card shadow-card">
       <div className="p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <Package className="h-6 w-6 text-primary" />
-          <h2 className="text-2xl font-bold text-foreground">Ordini di Oggi</h2>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Package className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-bold text-foreground">Ordini di Oggi</h2>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/archived-orders')}
+            className="flex items-center gap-2"
+          >
+            <Archive className="h-4 w-4" />
+            Vedi Archivio
+          </Button>
         </div>
 
         {orders.length === 0 ? (
@@ -151,12 +192,11 @@ const OrdersWindow = () => {
           <div className="space-y-4">
             {orders.map((order) => (
               <div key={order.id} className="p-4 border border-border rounded-lg">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Badge variant={order.status === 'pending' ? 'default' : 'secondary'}>
-                        {order.status === 'pending' ? 'In attesa' : 'Completato'}
-                      </Badge>
+                <div className="space-y-4">
+                  {/* Order Header */}
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">#{order.id.slice(0, 8)}</Badge>
                       <span className="text-sm text-muted-foreground">
                         {new Date(order.created_at).toLocaleTimeString('it-IT', {
                           hour: '2-digit',
@@ -164,38 +204,72 @@ const OrdersWindow = () => {
                         })}
                       </span>
                     </div>
-
-                    <div className="mb-3">
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Articoli ({order.total_items} totali):
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {order.order_items.map((item) => (
-                          <Badge key={item.id} variant="outline">
-                            {item.quantity}x {item.dish_name}
-                          </Badge>
-                        ))}
-                      </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => archiveOrder(order.id)}
+                        className="text-orange-600 hover:text-orange-700"
+                      >
+                        <Archive className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => deleteOrder(order.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
 
-                  <div className="flex gap-2 ml-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => archiveOrder(order.id)}
-                      className="text-orange-600 hover:text-orange-700"
-                    >
-                      <Archive className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => deleteOrder(order.id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  {/* Customer Info */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Cliente</p>
+                      <p className="font-medium">
+                        {order.customer_name} {order.customer_surname}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Tel: {order.customer_phone}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Orario ritiro</p>
+                      <p className="font-medium">
+                        {order.pickup_time || 'Non specificato'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Stato ordine</p>
+                      <Select
+                        value={order.status}
+                        onValueChange={(value) => updateOrderStatus(order.id, value)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">In attesa</SelectItem>
+                          <SelectItem value="completed">Ritirato</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Order Items */}
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Articoli ({order.total_items} totali):
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {order.order_items.map((item) => (
+                        <Badge key={item.id} variant="outline">
+                          {item.quantity}x {item.dish_name}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
