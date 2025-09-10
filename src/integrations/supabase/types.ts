@@ -14,6 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
+      cake_bases: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      cake_decorations: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      cake_exteriors: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      cake_fillings: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      cake_types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       dishes: {
         Row: {
           created_at: string
@@ -98,39 +188,96 @@ export type Database = {
       }
       orders: {
         Row: {
+          allergies: string | null
           archived_at: string | null
+          base_id: string | null
+          cake_design: boolean | null
+          cake_type_id: string | null
           created_at: string
           customer_name: string | null
           customer_phone: string | null
           customer_surname: string | null
           date: string
+          decoration_id: string | null
+          delivery_address: string | null
+          exterior_id: string | null
+          filling_id: string | null
           id: string
+          inscription: string | null
+          is_restaurant: boolean | null
+          needs_transport: boolean | null
+          people_count: number | null
+          pickup_date: string | null
           pickup_time: string | null
+          print_description: string | null
+          print_image_url: string | null
+          print_option: boolean | null
+          print_type: string | null
+          restaurant_contact: string | null
           status: string
+          tiers: number | null
           total_items: number
         }
         Insert: {
+          allergies?: string | null
           archived_at?: string | null
+          base_id?: string | null
+          cake_design?: boolean | null
+          cake_type_id?: string | null
           created_at?: string
           customer_name?: string | null
           customer_phone?: string | null
           customer_surname?: string | null
           date?: string
+          decoration_id?: string | null
+          delivery_address?: string | null
+          exterior_id?: string | null
+          filling_id?: string | null
           id?: string
+          inscription?: string | null
+          is_restaurant?: boolean | null
+          needs_transport?: boolean | null
+          people_count?: number | null
+          pickup_date?: string | null
           pickup_time?: string | null
+          print_description?: string | null
+          print_image_url?: string | null
+          print_option?: boolean | null
+          print_type?: string | null
+          restaurant_contact?: string | null
           status?: string
+          tiers?: number | null
           total_items?: number
         }
         Update: {
+          allergies?: string | null
           archived_at?: string | null
+          base_id?: string | null
+          cake_design?: boolean | null
+          cake_type_id?: string | null
           created_at?: string
           customer_name?: string | null
           customer_phone?: string | null
           customer_surname?: string | null
           date?: string
+          decoration_id?: string | null
+          delivery_address?: string | null
+          exterior_id?: string | null
+          filling_id?: string | null
           id?: string
+          inscription?: string | null
+          is_restaurant?: boolean | null
+          needs_transport?: boolean | null
+          people_count?: number | null
+          pickup_date?: string | null
           pickup_time?: string | null
+          print_description?: string | null
+          print_image_url?: string | null
+          print_option?: boolean | null
+          print_type?: string | null
+          restaurant_contact?: string | null
           status?: string
+          tiers?: number | null
           total_items?: number
         }
         Relationships: []

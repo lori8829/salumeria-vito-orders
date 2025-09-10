@@ -2,57 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Salumeria Vito Design System 
-   Palette: Rosso tradizionale #a61e1a, Nero #141300, Crema #f1efe9
+/* Pasticceria del Borgo Design System 
+   Palette: Verde menta #68edd1, Rosso #9b271c, Nero #0d0402
    UI: Card arrotondate, ombre leggere, mobile-first
 */
 
 @layer base {
   :root {
-    /* Brand Colors - Salumeria Vito */
-    --salumeria-red: 3 82% 37%;      /* #a61e1a */
-    --salumeria-dark: 60 100% 4%;    /* #141300 */
-    --salumeria-cream: 40 23% 94%;   /* #f1efe9 */
+    /* Brand Colors - Pasticceria del Borgo */
+    --borgo-mint: 166 71% 67%;        /* #68edd1 */
+    --borgo-red: 6 78% 35%;           /* #9b271c */
+    --borgo-dark: 13 89% 1%;          /* #0d0402 */
     
     /* Semantic Tokens */
-    --background: 40 23% 94%;        /* Crema per sfondo caldo */
-    --foreground: 60 100% 4%;        /* Nero per testo */
+    --background: 0 0% 100%;
+    --foreground: 13 89% 1%;
 
-    --card: 0 0% 100%;               /* Bianco per card */
-    --card-foreground: 60 100% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 13 89% 1%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 60 100% 4%;
+    --popover-foreground: 13 89% 1%;
 
-    --primary: 3 82% 37%;            /* Rosso Salumeria */
+    --primary: 166 71% 67%;            /* Verde menta */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 23% 94%;         /* Crema */
-    --secondary-foreground: 60 100% 4%;
+    --secondary: 6 78% 35%;            /* Rosso */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 40 15% 88%;             /* Crema più scura */
-    --muted-foreground: 60 20% 25%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
 
-    --accent: 3 82% 37%;             /* Rosso per accenti */
-    --accent-foreground: 0 0% 100%;
+    --accent: 166 71% 67%;
+    --accent-foreground: 13 89% 1%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 6 78% 35%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 40 15% 85%;            /* Bordi delicati */
-    --input: 40 15% 85%;
-    --ring: 3 82% 37%;               /* Focus ring rosso */
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 166 71% 67%;
 
-    --radius: 0.75rem;               /* Arrotondamenti più generosi */
-    
-    /* Custom gradients */
-    --gradient-warm: linear-gradient(135deg, hsl(var(--salumeria-cream)), hsl(40 30% 96%));
-    --gradient-brand: linear-gradient(135deg, hsl(var(--salumeria-red)), hsl(3 65% 45%));
-    
-    /* Shadows */
-    --shadow-soft: 0 2px 8px -2px hsl(var(--salumeria-dark) / 0.1);
-    --shadow-card: 0 4px 16px -4px hsl(var(--salumeria-dark) / 0.15);
-    --shadow-elevated: 0 8px 32px -8px hsl(var(--salumeria-dark) / 0.2);
+    --chart-1: 166 71% 67%;
+    --chart-2: 6 78% 35%;
+    --chart-3: 13 89% 1%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -72,41 +69,39 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 13 89% 1%;
+    --foreground: 0 0% 98%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 13 89% 1%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 13 89% 1%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 166 71% 67%;
+    --primary-foreground: 13 89% 1%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 6 78% 35%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 166 71% 67%;
+    --accent-foreground: 13 89% 1%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 6 78% 35%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 166 71% 67%;
+
+    --chart-1: 166 71% 67%;
+    --chart-2: 6 78% 35%;
+    --chart-3: 13 89% 1%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 

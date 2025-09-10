@@ -1,339 +1,20 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Header } from "@/components/Header";
-import { OrdersWindow } from "@/components/OrdersWindow";
-import { Plus, Trash2, FileText, Archive, LogOut, ArrowLeft } from "lucide-react";
+import { DropdownManager } from "@/components/DropdownManager";
+import { LogOut, ArrowLeft, Calendar, Package, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { OrdersWindow } from "@/components/OrdersWindow";
 
-
-interface MenuItem {
-  id: string;
-  name: string;
-  price_cents: number;
-  has_time_restriction?: boolean;
-}
-
-interface Dish {
-  id: string;
-  name: string;
-}
 
 const Admin = () => {
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [dishes, setDishes] = useState<Dish[]>([]);
-  const [newItem, setNewItem] = useState({ name: "", selectedDish: "" });
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  // Load all dishes and today's menu from database
-  useEffect(() => {
-    loadDishes();
-    loadTodaysMenu();
-  }, []);
-
-  const loadDishes = async () => {
-    const { data, error } = await supabase
-      .from('dishes')
-      .select('*')
-      .order('name');
-    
-    if (error) {
-      console.error('Error loading dishes:', error);
-    } else {
-      setDishes(data || []);
-    }
-  };
-
-  const loadTodaysMenu = async () => {
-    const today = new Date().toISOString().split('T')[0];
-    
-    const { data, error } = await supabase
-      .from('menu_items')
-      .select(`
-        id,
-        has_time_restriction,
-        dishes (
-          id,
-          name
-        )
-      `)
-      .eq('date', today);
-    
-    if (error) {
-      console.error('Error loading menu items:', error);
-    } else {
-      const formattedItems = data?.map(item => ({
-        id: item.id,
-        name: item.dishes?.name || 'Piatto sconosciuto',
-        price_cents: 0,
-        has_time_restriction: item.has_time_restriction || false
-      })) || [];
-      setMenuItems(formattedItems);
-    }
-  };
-
-  // Auto-archive menu at 23:00 every day
-  useEffect(() => {
-    const checkAutoArchive = () => {
-      const now = new Date();
-      if (now.getHours() === 23 && now.getMinutes() === 0) {
-        handleArchiveMenu();
-      }
-    };
-
-    const interval = setInterval(checkAutoArchive, 60000); // Check every minute
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleAddItem = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    let dishName = "";
-    
-    if (newItem.selectedDish) {
-      // Use selected dish from dropdown
-      const selectedDish = dishes.find(d => d.id === newItem.selectedDish);
-      if (selectedDish) {
-        dishName = selectedDish.name;
-      }
-    } else if (newItem.name) {
-      // Create new dish
-      dishName = newItem.name;
-      
-      // Save new dish to database
-      const { data: newDish, error } = await supabase
-        .from('dishes')
-        .insert({ name: dishName })
-        .select()
-        .single();
-      
-      if (error) {
-        if (error.code === '23505') { // Unique constraint violation
-          toast({
-            title: "Piatto già esistente",
-            description: "Questo piatto è già presente nel database",
-            variant: "destructive"
-          });
-        } else {
-          toast({
-            title: "Errore",
-            description: "Errore durante il salvataggio del piatto",
-            variant: "destructive"
-          });
-        }
-        return;
-      }
-      
-      // Reload dishes to include the new one
-      await loadDishes();
-    } else {
-      toast({
-        title: "Errore",
-        description: "Seleziona un piatto dal menù o inserisci un nuovo nome",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Add to today's menu in database
-    const today = new Date().toISOString().split('T')[0];
-    
-    // Find the dish ID
-    let dishId = "";
-    if (newItem.selectedDish) {
-      dishId = newItem.selectedDish;
-    } else {
-      // Find the newly created dish
-      const dish = dishes.find(d => d.name === dishName);
-      if (dish) {
-        dishId = dish.id;
-      }
-    }
-    
-    if (dishId) {
-      const { data: menuItem, error: menuError } = await supabase
-        .from('menu_items')
-        .insert({
-          dish_id: dishId,
-          date: today
-        })
-        .select(`
-          id,
-          dishes (
-            id,
-            name
-          )
-        `)
-        .single();
-      
-      if (menuError) {
-        toast({
-          title: "Errore",
-          description: "Errore durante l'aggiunta al menù",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // Add to local state
-      const newMenuItem = {
-        id: menuItem.id,
-        name: menuItem.dishes?.name || dishName,
-        price_cents: 0
-      };
-      
-      setMenuItems(prev => [...prev, newMenuItem]);
-    }
-    
-    setNewItem({ name: "", selectedDish: "" });
-    
-    toast({
-      title: "Piatto aggiunto!",
-      description: `${dishName} è stato aggiunto al menù`
-    });
-  };
-
-  const handleDeleteItem = async (id: string) => {
-    // Delete from database
-    const { error } = await supabase
-      .from('menu_items')
-      .delete()
-      .eq('id', id);
-    
-    if (error) {
-      toast({
-        title: "Errore",
-        description: "Errore durante la rimozione del piatto",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Remove from local state
-    setMenuItems(prev => prev.filter(item => item.id !== id));
-    toast({
-      title: "Piatto rimosso",
-      description: "Il piatto è stato rimosso dal menù"
-    });
-  };
-
-  const handlePrintMenu = () => {
-    // Generate HTML content for menu
-    const menuHTML = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Menù Salumeria Vito - ${new Date().toLocaleDateString('it-IT')}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 40px; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .logo { width: 80px; height: 80px; margin: 0 auto 20px; }
-            h1 { color: #dc2626; margin-bottom: 10px; }
-            .date { color: #666; margin-bottom: 30px; }
-            .menu-item { padding: 15px; border-bottom: 1px solid #eee; }
-            .menu-item:last-child { border-bottom: none; }
-            .item-name { font-size: 18px; font-weight: bold; }
-            @media print { body { margin: 20px; } }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <img src="/lovable-uploads/de909bd5-2e0a-47eb-bb4c-d284d67726cb.png" alt="Salumeria Vito" class="logo" />
-            <h1>Salumeria Vito</h1>
-            <p class="date">Menù del ${new Date().toLocaleDateString('it-IT', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}</p>
-          </div>
-          <div class="menu">
-            ${menuItems.map(item => `
-              <div class="menu-item">
-                <div class="item-name">${item.name}</div>
-              </div>
-            `).join('')}
-          </div>
-        </body>
-      </html>
-    `;
-
-    // Create and open print window
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(menuHTML);
-      printWindow.document.close();
-      setTimeout(() => {
-        printWindow.print();
-      }, 250);
-    }
-
-    toast({
-      title: "Stampa avviata",
-      description: "Il menù è pronto per la stampa"
-    });
-  };
-
-  const handleArchiveMenu = async () => {
-    const today = new Date().toISOString().split('T')[0];
-    
-    // Delete all menu items for today
-    const { error } = await supabase
-      .from('menu_items')
-      .delete()
-      .eq('date', today);
-    
-    if (error) {
-      toast({
-        title: "Errore",
-        description: "Errore durante l'archiviazione del menù",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setMenuItems([]);
-    toast({
-      title: "Menù archiviato",
-      description: "Il menù di oggi è stato archiviato"
-    });
-  };
-
-  const handleTimeRestrictionToggle = async (menuItemId: string, hasRestriction: boolean) => {
-    const { error } = await supabase
-      .from('menu_items')
-      .update({ has_time_restriction: hasRestriction })
-      .eq('id', menuItemId);
-    
-    if (error) {
-      toast({
-        title: "Errore",
-        description: "Errore durante l'aggiornamento dell'orario",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Update local state
-    setMenuItems(prev => prev.map(item => 
-      item.id === menuItemId 
-        ? { ...item, has_time_restriction: hasRestriction }
-        : item
-    ));
-    
-    toast({
-      title: hasRestriction ? "Orario aggiunto" : "Orario rimosso",
-      description: hasRestriction ? "Il piatto avrà il tag ORE 12:00" : "Il tag orario è stato rimosso"
-    });
-  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -342,137 +23,53 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 border-b border-border gap-4">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+      <Header 
+        title="Pasticceria del Borgo"
+        subtitle="Pannello Amministratore"
+      />
+      
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center p-4 border-b border-border gap-4">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
           <Link to="/">
             <Button variant="outline" className="flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
               Torna alla Home
             </Button>
           </Link>
-          <div className="text-center md:text-left">
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Admin</h1>
-            <p className="text-sm md:text-base text-muted-foreground">Gestione menù e ordini</p>
+          <div className="text-center lg:text-left">
+            <h1 className="text-xl lg:text-2xl font-bold text-foreground">Admin</h1>
+            <p className="text-sm lg:text-base text-muted-foreground">Gestione ordini pasticceria</p>
           </div>
         </div>
-        <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2 w-full md:w-auto">
+        <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2 w-full lg:w-auto">
           <LogOut className="h-4 w-4" />
           Esci
         </Button>
       </div>
       
-      <main className="container mx-auto px-4 py-8 space-y-8">
-        {/* Add Menu Item Form */}
-        <Card className="bg-card shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
-              <Plus className="h-5 w-5 text-primary" />
-              Aggiungi piatto al menù di oggi
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleAddItem} className="space-y-4">
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <Label htmlFor="existingDish">Scegli piatto esistente</Label>
-                  <Select 
-                    value={newItem.selectedDish} 
-                    onValueChange={(value) => setNewItem(prev => ({ ...prev, selectedDish: value, name: "" }))}
-                  >
-                    <SelectTrigger className="bg-background border-border">
-                      <SelectValue placeholder="Seleziona un piatto..." />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border-border z-50">
-                      {dishes.map((dish) => (
-                        <SelectItem key={dish.id} value={dish.id}>
-                          {dish.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="newDish">Oppure inserisci nuovo piatto</Label>
-                  <Input
-                    id="newDish"
-                    value={newItem.name}
-                    onChange={(e) => setNewItem(prev => ({ ...prev, name: e.target.value, selectedDish: "" }))}
-                    placeholder="es. Lasagne della nonna"
-                    disabled={!!newItem.selectedDish}
-                  />
-                </div>
-              </div>
-              <Button type="submit" className="bg-primary hover:bg-primary/90 w-full md:w-auto">
-                <Plus className="h-4 w-4 mr-2" />
-                Aggiungi piatto
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Current Menu */}
-        <Card className="bg-card shadow-card">
-          <CardHeader>
-            <CardTitle>Menù di oggi</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {menuItems.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">
-                Nessun piatto inserito nel menù di oggi
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {menuItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-3 md:p-4 border border-border rounded-lg">
-                    <div className="flex items-center gap-3 flex-1">
-                      <input
-                        type="checkbox"
-                        checked={item.has_time_restriction || false}
-                        onChange={(e) => handleTimeRestrictionToggle(item.id, e.target.checked)}
-                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                      />
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-sm md:text-base">{item.name}</h3>
-                        {item.has_time_restriction && (
-                          <span className="text-xs text-red-600 font-medium">ORE 12:00</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Menu Actions */}
-        <Card className="bg-card shadow-card">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row gap-3">
-              <Button variant="secondary" onClick={handlePrintMenu} className="w-full md:w-auto">
-                <FileText className="h-4 w-4 mr-2" />
-                Stampa menù (PDF)
-              </Button>
-              <Button variant="outline" onClick={handleArchiveMenu} className="w-full md:w-auto">
-                <Archive className="h-4 w-4 mr-2" />
-                Archivia menù
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Orders Management */}
-        <OrdersWindow />
+      <main className="container mx-auto px-4 py-6 lg:py-8">
+        <Tabs defaultValue="orders" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsTrigger value="orders" className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              <span className="hidden sm:inline">Gestione Ordini</span>
+              <span className="sm:hidden">Ordini</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              <span className="hidden sm:inline">Impostazioni</span>
+              <span className="sm:hidden">Config</span>
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="orders" className="space-y-6">
+            <OrdersWindow />
+          </TabsContent>
+          
+          <TabsContent value="settings" className="space-y-6">
+            <DropdownManager />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
