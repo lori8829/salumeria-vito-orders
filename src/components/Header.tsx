@@ -15,7 +15,7 @@ export function Header({ title, subtitle }: HeaderProps) {
         <div className="container mx-auto px-4 py-6">
           <div className="text-center">
             <div className="flex items-center justify-center mb-4">
-              <img src="/lovable-uploads/78d1f231-5811-4af3-b5b8-f58677698dca.png" alt="Pasticceria del Borgo Logo" className="h-24 w-24 md:h-32 md:w-32" />
+              <img src="/lovable-uploads/0e6ea90f-ae9e-46b2-8fa2-805659673e5b.png" alt="Pasticceria del Borgo Logo" className="h-24 w-24 md:h-32 md:w-32" />
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
               Menù del giorno
@@ -41,7 +41,7 @@ export function Header({ title, subtitle }: HeaderProps) {
       <div className="container mx-auto px-4 py-6">
         <div className="text-center">
           <div className="flex items-center justify-center gap-3 mb-2">
-            <img src="/lovable-uploads/78d1f231-5811-4af3-b5b8-f58677698dca.png" alt="Pasticceria del Borgo Logo" className="h-16 w-16" />
+            <img src="/lovable-uploads/0e6ea90f-ae9e-46b2-8fa2-805659673e5b.png" alt="Pasticceria del Borgo Logo" className="h-16 w-16" />
             <h1 className="text-3xl md:text-4xl font-bold text-foreground">
               {title}
             </h1>
