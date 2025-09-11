@@ -216,48 +216,43 @@ export function DropdownManager() {
       <CardContent>
         <Tabs defaultValue="cakeTypes" className="w-full">
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-            <Button 
-              variant="outline" 
-              className="bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
-              onClick={() => document.querySelector('[value="cakeTypes"]')?.click()}
+            <TabsTrigger 
+              value="cakeTypes"
+              className="bg-red-50 hover:bg-red-100 text-red-700 border-red-200 data-[state=active]:bg-red-100"
             >
               Torte
-            </Button>
-            <Button 
-              variant="outline" 
-              className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
-              onClick={() => document.querySelector('[value="bases"]')?.click()}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="bases"
+              className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 data-[state=active]:bg-blue-100"
             >
               Basi
-            </Button>
-            <Button 
-              variant="outline" 
-              className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
-              onClick={() => document.querySelector('[value="fillings"]')?.click()}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="fillings"
+              className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200 data-[state=active]:bg-green-100"
             >
               Farce
-            </Button>
-            <Button 
-              variant="outline" 
-              className="bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
-              onClick={() => document.querySelector('[value="exteriors"]')?.click()}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="exteriors"
+              className="bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200 data-[state=active]:bg-purple-100"
             >
               Esterni
-            </Button>
-            <Button 
-              variant="outline" 
-              className="bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200"
-              onClick={() => document.querySelector('[value="decorations"]')?.click()}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="decorations"
+              className="bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200 data-[state=active]:bg-orange-100"
             >
               Decorazioni
-            </Button>
+            </TabsTrigger>
           </div>
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 sr-only">
-            <TabsTrigger value="cakeTypes" className="text-xs sm:text-sm">Torte</TabsTrigger>
-            <TabsTrigger value="bases" className="text-xs sm:text-sm">Basi</TabsTrigger>
-            <TabsTrigger value="fillings" className="text-xs sm:text-sm">Farce</TabsTrigger>
-            <TabsTrigger value="exteriors" className="text-xs sm:text-sm">Esterni</TabsTrigger>
-            <TabsTrigger value="decorations" className="text-xs sm:text-sm">Decorazioni</TabsTrigger>
+          <TabsList className="sr-only">
+            <TabsTrigger value="cakeTypes">Torte</TabsTrigger>
+            <TabsTrigger value="bases">Basi</TabsTrigger>
+            <TabsTrigger value="fillings">Farce</TabsTrigger>
+            <TabsTrigger value="exteriors">Esterni</TabsTrigger>
+            <TabsTrigger value="decorations">Decorazioni</TabsTrigger>
           </TabsList>
           
           <TabsContent value="cakeTypes" className="mt-6">

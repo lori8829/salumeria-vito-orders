@@ -199,6 +199,7 @@ export type Database = {
           customer_surname: string | null
           date: string
           decoration_id: string | null
+          decoration_text: string | null
           delivery_address: string | null
           exterior_id: string | null
           filling_id: string | null
@@ -230,6 +231,7 @@ export type Database = {
           customer_surname?: string | null
           date?: string
           decoration_id?: string | null
+          decoration_text?: string | null
           delivery_address?: string | null
           exterior_id?: string | null
           filling_id?: string | null
@@ -261,6 +263,7 @@ export type Database = {
           customer_surname?: string | null
           date?: string
           decoration_id?: string | null
+          decoration_text?: string | null
           delivery_address?: string | null
           exterior_id?: string | null
           filling_id?: string | null
