@@ -32,6 +32,8 @@ export function CakeOrderForm({ onSubmit, onCancel }: CakeOrderFormProps) {
     peopleCount: "",
     base: "",
     filling: "",
+    secondFilling: "",
+    addSecondFilling: false,
     allergies: "",
     exterior: "",
     printOption: false,
@@ -39,6 +41,7 @@ export function CakeOrderForm({ onSubmit, onCancel }: CakeOrderFormProps) {
     printDescription: "",
     printImage: null as File | null,
     decoration: "",
+    decorationText: "",
     inscription: "",
     needsTransport: false,
     isRestaurant: false,
@@ -218,9 +221,14 @@ export function CakeOrderForm({ onSubmit, onCancel }: CakeOrderFormProps) {
             </SelectContent>
           </Select>
         </div>
-        <div>
+        <div className="space-y-3">
           <Label htmlFor="filling">Farcia</Label>
-          <Select value={formData.filling} onValueChange={(value) => handleInputChange('filling', value)}>
+          <Select value={formData.filling} onValueChange={(value) => {
+            handleInputChange('filling', value);
+            if (value && !formData.addSecondFilling) {
+              handleInputChange('addSecondFilling', true);
+            }
+          }}>
             <SelectTrigger>
               <SelectValue placeholder="Seleziona farcia" />
             </SelectTrigger>
@@ -230,6 +238,22 @@ export function CakeOrderForm({ onSubmit, onCancel }: CakeOrderFormProps) {
               ))}
             </SelectContent>
           </Select>
+          
+          {formData.addSecondFilling && formData.filling && (
+            <div>
+              <Label htmlFor="secondFilling">Seconda farcia (opzionale)</Label>
+              <Select value={formData.secondFilling} onValueChange={(value) => handleInputChange('secondFilling', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleziona seconda farcia" />
+                </SelectTrigger>
+                <SelectContent>
+                  {dropdownOptions.fillings.map((filling) => (
+                    <SelectItem key={filling.id} value={filling.id}>{filling.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
       </div>
 
@@ -325,7 +349,7 @@ export function CakeOrderForm({ onSubmit, onCancel }: CakeOrderFormProps) {
           )}
         </div>
         
-        <div>
+        <div className="space-y-3">
           <Label htmlFor="decoration">Decorazione</Label>
           <Select value={formData.decoration} onValueChange={(value) => handleInputChange('decoration', value)}>
             <SelectTrigger>
@@ -337,6 +361,17 @@ export function CakeOrderForm({ onSubmit, onCancel }: CakeOrderFormProps) {
               ))}
             </SelectContent>
           </Select>
+          
+          <div>
+            <Label htmlFor="decorationText">Dettagli decorazione</Label>
+            <Textarea
+              id="decorationText"
+              value={formData.decorationText}
+              onChange={(e) => handleInputChange('decorationText', e.target.value)}
+              placeholder="Descrivi dettagli aggiuntivi per la decorazione"
+              rows={2}
+            />
+          </div>
         </div>
       </div>
 

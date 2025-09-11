@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Archive, Clock, Package } from "lucide-react";
+import { Clock, Package } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { CompactOrderCard } from "@/components/CompactOrderCard";
 
 interface Order {
   id: string;
@@ -18,11 +17,26 @@ interface Order {
   customer_surname: string;
   customer_phone: string;
   pickup_time: string;
-  order_items: {
-    id: string;
-    dish_name: string;
-    quantity: number;
-  }[];
+  pickup_date: string;
+  cake_type_id: string;
+  people_count: number;
+  base_id: string;
+  filling_id: string;
+  second_filling_id?: string;
+  allergies: string;
+  exterior_id: string;
+  decoration_id: string;
+  decoration_text: string;
+  inscription: string;
+  needs_transport: boolean;
+  is_restaurant: boolean;
+  delivery_address: string;
+  restaurant_contact: string;
+  cake_design: boolean;
+  tiers: number;
+  print_option: boolean;
+  print_type: string;
+  print_description: string;
 }
 
 const OrdersWindow = () => {
@@ -50,11 +64,25 @@ const OrdersWindow = () => {
           customer_surname,
           customer_phone,
           pickup_time,
-          order_items (
-            id,
-            dish_name,
-            quantity
-          )
+          pickup_date,
+          cake_type_id,
+          people_count,
+          base_id,
+          filling_id,
+          allergies,
+          exterior_id,
+          decoration_id,
+          decoration_text,
+          inscription,
+          needs_transport,
+          is_restaurant,
+          delivery_address,
+          restaurant_contact,
+          cake_design,
+          tiers,
+          print_option,
+          print_type,
+          print_description
         `)
         .eq('date', today)
         .neq('status', 'archived')
@@ -191,88 +219,13 @@ const OrdersWindow = () => {
         ) : (
           <div className="space-y-4">
             {orders.map((order) => (
-              <div key={order.id} className="p-4 border border-border rounded-lg">
-                <div className="space-y-4">
-                  {/* Order Header */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">#{order.id.slice(0, 8)}</Badge>
-                      <span className="text-sm text-muted-foreground">
-                        {new Date(order.created_at).toLocaleTimeString('it-IT', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => archiveOrder(order.id)}
-                        className="text-orange-600 hover:text-orange-700"
-                      >
-                        <Archive className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => deleteOrder(order.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Customer Info */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Cliente</p>
-                      <p className="font-medium">
-                        {order.customer_name} {order.customer_surname}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Tel: {order.customer_phone}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Orario ritiro</p>
-                      <p className="font-medium">
-                        {order.pickup_time || 'Non specificato'}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Stato ordine</p>
-                      <Select
-                        value={order.status}
-                        onValueChange={(value) => updateOrderStatus(order.id, value)}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pending">In attesa</SelectItem>
-                          <SelectItem value="completed">Ritirato</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* Order Items */}
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Articoli ({order.total_items} totali):
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {order.order_items.map((item) => (
-                        <Badge key={item.id} variant="outline">
-                          {item.quantity}x {item.dish_name}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <CompactOrderCard
+                key={order.id}
+                order={order}
+                onStatusChange={updateOrderStatus}
+                onArchive={archiveOrder}
+                onDelete={deleteOrder}
+              />
             ))}
           </div>
         )}

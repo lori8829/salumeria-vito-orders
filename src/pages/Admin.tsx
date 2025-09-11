@@ -25,23 +25,17 @@ const Admin = () => {
     <div className="min-h-screen bg-background">
       <Header 
         title="Pasticceria del Borgo"
-        subtitle="Pannello Amministratore"
+        subtitle="Gestione ordini pasticceria"
       />
       
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center p-4 border-b border-border gap-4">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
-          <Link to="/">
-            <Button variant="outline" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Torna alla Home
-            </Button>
-          </Link>
-          <div className="text-center lg:text-left">
-            <h1 className="text-xl lg:text-2xl font-bold text-foreground">Admin</h1>
-            <p className="text-sm lg:text-base text-muted-foreground">Gestione ordini pasticceria</p>
-          </div>
-        </div>
-        <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2 w-full lg:w-auto">
+      <div className="flex justify-between items-center px-4 py-2 border-b border-border">
+        <Link to="/">
+          <Button variant="outline" className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Torna alla Home
+          </Button>
+        </Link>
+        <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
           <LogOut className="h-4 w-4" />
           Esci
         </Button>
