@@ -97,10 +97,9 @@ const ArchivedOrders = () => {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('it-IT', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit'
     });
   };
 

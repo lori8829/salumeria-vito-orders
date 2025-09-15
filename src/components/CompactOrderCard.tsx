@@ -79,6 +79,16 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('it-IT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit'
+    });
+  };
+
   const printImage = (imageUrl: string) => {
     const printWindow = window.open('', '_blank');
     if (printWindow) {
@@ -247,7 +257,7 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
                 {order.pickup_date && (
                   <div>
                     <p className="font-medium text-muted-foreground">Data consegna</p>
-                    <p>{new Date(order.pickup_date).toLocaleDateString('it-IT')}</p>
+                    <p>{formatDate(order.pickup_date)}</p>
                   </div>
                 )}
 
@@ -405,7 +415,7 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
                     {order.pickup_date && (
                       <div>
                         <p className="font-medium text-muted-foreground">Data ritiro</p>
-                        <p>{new Date(order.pickup_date).toLocaleDateString('it-IT')}</p>
+                        <p>{formatDate(order.pickup_date)}</p>
                       </div>
                     )}
 
