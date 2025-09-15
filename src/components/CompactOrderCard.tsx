@@ -170,13 +170,19 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <div className="text-sm text-muted-foreground whitespace-nowrap">
-              {new Date(order.created_at).toLocaleDateString('it-IT')} - {order.pickup_time || 'N/A'}
+              {formatDate(order.pickup_date)} - {order.pickup_time || 'N/A'}
             </div>
             <div className="font-medium truncate">
               {order.customer_name} {order.customer_surname}
             </div>
             <div className="text-sm text-muted-foreground truncate">
               {order.category?.name || 'Torta personalizzata'}
+            </div>
+            <div className="text-sm text-muted-foreground whitespace-nowrap">
+              {order.people_count ? `${order.people_count} pers.` : 'N/A'}
+            </div>
+            <div className="text-sm text-muted-foreground truncate">
+              {order.customer_phone || 'N/A'}
             </div>
             {order.people_count && (
               <div className="text-sm text-muted-foreground whitespace-nowrap">
