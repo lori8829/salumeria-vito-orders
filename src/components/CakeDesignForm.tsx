@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,20 +10,41 @@ import { CalendarIcon, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 
-interface CakeDesignFormProps {
-  onSubmit: (orderData: any) => void;
-  onCancel: () => void;
+interface CustomerProfile {
+  id: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  email: string | null;
 }
 
-export function CakeDesignForm({ onSubmit, onCancel }: CakeDesignFormProps) {
+interface CakeDesignFormProps {
+  onSubmit: (orderData: any) => void;
+  category: any;
+  customerProfile?: CustomerProfile | null;
+}
+
+export function CakeDesignForm({ onSubmit, category, customerProfile }: CakeDesignFormProps) {
   const [formData, setFormData] = useState({
-    name: "",
-    surname: "",
-    phone: "",
+    customerName: customerProfile?.first_name || "",
+    customerSurname: customerProfile?.last_name || "",
+    customerPhone: customerProfile?.phone || "",
     description: "",
     pickupDate: "",
     inspirationImage: null as string | null
   });
+
+  // Update form data when customerProfile changes
+  useEffect(() => {
+    if (customerProfile) {
+      setFormData(prev => ({
+        ...prev,
+        customerName: customerProfile.first_name,
+        customerSurname: customerProfile.last_name,
+        customerPhone: customerProfile.phone
+      }));
+    }
+  }, [customerProfile]);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -67,7 +88,7 @@ export function CakeDesignForm({ onSubmit, onCancel }: CakeDesignFormProps) {
     e.preventDefault();
     
     // Validate required fields
-    if (!formData.name || !formData.surname || !formData.phone || !formData.description) {
+    if (!formData.customerName || !formData.customerSurname || !formData.customerPhone || !formData.description) {
       alert('Nome, cognome, telefono e descrizione sono obbligatori');
       return;
     }
@@ -79,9 +100,9 @@ export function CakeDesignForm({ onSubmit, onCancel }: CakeDesignFormProps) {
 
     // Transform data for submission
     const orderData = {
-      name: formData.name,
-      surname: formData.surname,
-      phone: formData.phone,
+      customerName: formData.customerName,
+      customerSurname: formData.customerSurname,
+      customerPhone: formData.customerPhone,
       pickupDate: formData.pickupDate,
       fieldValues: {
         cake_description: formData.description,
@@ -105,31 +126,34 @@ export function CakeDesignForm({ onSubmit, onCancel }: CakeDesignFormProps) {
       {/* Fixed fields: Nome, Cognome, Telefono */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b">
         <div>
-          <Label htmlFor="name">Nome *</Label>
+          <Label htmlFor="customerName">Nome *</Label>
           <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
+            id="customerName"
+            value={formData.customerName}
+            onChange={(e) => handleInputChange('customerName', e.target.value)}
             required
+            disabled={!!customerProfile}
           />
         </div>
         <div>
-          <Label htmlFor="surname">Cognome *</Label>
+          <Label htmlFor="customerSurname">Cognome *</Label>
           <Input
-            id="surname"
-            value={formData.surname}
-            onChange={(e) => handleInputChange('surname', e.target.value)}
+            id="customerSurname"
+            value={formData.customerSurname}
+            onChange={(e) => handleInputChange('customerSurname', e.target.value)}
             required
+            disabled={!!customerProfile}
           />
         </div>
         <div>
-          <Label htmlFor="phone">Telefono *</Label>
+          <Label htmlFor="customerPhone">Telefono *</Label>
           <Input
-            id="phone"
+            id="customerPhone"
             type="tel"
-            value={formData.phone}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
+            value={formData.customerPhone}
+            onChange={(e) => handleInputChange('customerPhone', e.target.value)}
             required
+            disabled={!!customerProfile}
           />
         </div>
       </div>
@@ -220,10 +244,7 @@ export function CakeDesignForm({ onSubmit, onCancel }: CakeDesignFormProps) {
 
       {/* Buttons */}
       <div className="flex gap-4 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-          Annulla
-        </Button>
-        <Button type="submit" className="flex-1">
+        <Button type="submit" className="w-full">
           Invia ordine
         </Button>
       </div>

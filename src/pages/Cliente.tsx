@@ -1,13 +1,27 @@
 import { useState, useEffect } from "react";
-import { Header } from "@/components/Header";
-import { CategoryOrderForm } from "@/components/CategoryOrderForm";
-import { CakeDesignForm } from "@/components/CakeDesignForm";
-import { OrderConfirmationDialog } from "@/components/OrderConfirmationDialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { ChefHat, Cookie, Cake, Sparkles } from "lucide-react";
+import { Header } from "@/components/Header";
+import { CakeDesignForm } from "@/components/CakeDesignForm";
+import { CategoryOrderForm } from "@/components/CategoryOrderForm";
+import { OrderConfirmationDialog } from "@/components/OrderConfirmationDialog";
+import { CustomerProfile } from "@/components/CustomerProfile";
+import { Link } from "react-router-dom";
+import { User as SupabaseUser } from "@supabase/supabase-js";
+import { 
+  Cake, 
+  Coffee, 
+  Cookie, 
+  Croissant, 
+  IceCream, 
+  Pizza,
+  ChefHat,
+  Utensils,
+  Candy,
+  LogIn
+} from "lucide-react";
 
 interface Category {
   id: string;
@@ -17,15 +31,40 @@ interface Category {
   min_lead_days: number;
 }
 
+interface CustomerProfile {
+  id: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  email: string | null;
+}
+
 const Cliente = () => {
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [showOrderDialog, setShowOrderDialog] = useState(false);
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
+  const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [customerProfile, setCustomerProfile] = useState<CustomerProfile | null>(null);
 
   useEffect(() => {
     loadCategories();
+    checkAuth();
   }, []);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setUser(session?.user ?? null);
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  };
 
   const loadCategories = async () => {
     try {
@@ -43,56 +82,36 @@ const Cliente = () => {
 
   const handleCategorySelect = (category: Category) => {
     setSelectedCategory(category);
-    setShowOrderDialog(true);
+    setIsOrderDialogOpen(true);
   };
 
   const handleOrderSubmit = async (orderData: any) => {
     try {
-      // Find image uploads for print_image_url
-      let printImageUrl = null;
-      if (orderData.fieldValues) {
-        // Look for image fields that should be saved as print_image_url
-        for (const [key, value] of Object.entries(orderData.fieldValues)) {
-          if (typeof value === 'string' && (value.includes('/order-images/') || value.startsWith('http'))) {
-            // If it's an image field (print_image, image, etc.), save it as print_image_url
-            if (key.toLowerCase().includes('immagine') || key.toLowerCase().includes('image') || key.toLowerCase().includes('print')) {
-              printImageUrl = value;
-              break;
-            }
-          }
-        }
-      }
-
-      // Create order in database
-      const orderInsertData = {
-        customer_name: orderData.name,
-        customer_surname: orderData.surname,
-        customer_phone: orderData.phone,
-        category_id: selectedCategory?.id,
-        pickup_date: orderData.fieldValues?.pickup_date || null,
-        pickup_time: orderData.fieldValues?.pickup_time || null,
-        print_image_url: printImageUrl,
-        print_option: printImageUrl ? true : false,
-        status: 'Ricevuto',
-        total_items: 1
-      };
-
+      console.log('Order data received:', orderData);
+      
+      // Insert order with user_id if user is logged in
       const { data: orderResult, error: orderError } = await supabase
         .from('orders')
-        .insert(orderInsertData)
+        .insert({
+          customer_name: orderData.customerName,
+          customer_surname: orderData.customerSurname,
+          customer_phone: orderData.customerPhone,
+          pickup_date: orderData.pickupDate,
+          pickup_time: orderData.pickupTime,
+          allergies: orderData.allergies,
+          category_id: selectedCategory?.id,
+          user_id: user?.id || null,
+          date: new Date().toISOString().split('T')[0],
+          total_items: 1
+        })
         .select()
         .single();
 
-      if (orderError) {
-        console.error('Error creating order:', orderError);
-        alert('Errore durante la creazione dell\'ordine');
-        return;
-      }
+      if (orderError) throw orderError;
 
-      // Save field values
-      if (orderData.fieldValues && orderResult) {
+      // If it's cake design, handle additional fields
+      if (selectedCategory?.slug === 'cake-design' && orderData.fieldValues) {
         const fieldValues = Object.entries(orderData.fieldValues).map(([key, value]: [string, any]) => {
-          // Check if the value is a URL (for uploaded files)
           const isFileUrl = typeof value === 'string' && (value.includes('/order-images/') || value.startsWith('http'));
           
           return {
@@ -112,8 +131,8 @@ const Cliente = () => {
         }
       }
 
-      setShowOrderDialog(false);
-      setShowConfirmationDialog(true);
+      setIsOrderDialogOpen(false);
+      setIsConfirmationDialogOpen(true);
       
     } catch (error) {
       console.error('Error during order creation:', error);
@@ -159,64 +178,87 @@ const Cliente = () => {
       />
       
       <main className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-8">
-            Che torta vuoi ordinare oggi?
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {categories.map((category) => (
-              <Card 
-                key={category.id}
-                className={`p-8 cursor-pointer transition-all duration-300 hover:shadow-elevated hover:scale-105 border-2 ${getCategoryColor(category.name)}`}
-                onClick={() => handleCategorySelect(category)}
-              >
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="p-4 bg-white/50 rounded-full">
-                    {getCategoryIcon(category.name)}
-                  </div>
-                  <h3 className="text-lg font-bold text-center">
-                    {category.name}
-                  </h3>
-                  <Button 
-                    className="w-full mt-4"
-                    variant="outline"
-                  >
-                    Seleziona
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-primary mb-2">
+            Benvenuto alla Pasticceria del Borgo
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Scegli una categoria per iniziare il tuo ordine
+          </p>
+        </div>
+
+        {/* Auth section */}
+        <div className="mb-8 flex justify-center">
+          {user ? (
+            <CustomerProfile 
+              user={user} 
+              onProfileUpdate={setCustomerProfile}
+            />
+          ) : (
+            <Card className="w-full max-w-md">
+              <CardContent className="pt-6 text-center">
+                <p className="mb-4 text-muted-foreground">
+                  Accedi per velocizzare i tuoi ordini futuri e tenere traccia dello storico
+                </p>
+                <Link to="/customer-auth">
+                  <Button className="w-full">
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Accedi o Registrati
                   </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {categories.map((category) => (
+            <Card 
+              key={category.id}
+              className={`p-6 cursor-pointer transition-all duration-200 hover:shadow-lg ${getCategoryColor(category.name)}`}
+              onClick={() => handleCategorySelect(category)}
+            >
+              <CardContent className="flex flex-col items-center space-y-4 p-0">
+                <div className="p-3 bg-background/50 rounded-full">
+                  {getCategoryIcon(category.name)}
                 </div>
-              </Card>
-            ))}
-          </div>
+                <CardTitle className="text-center text-lg">
+                  {category.name}
+                </CardTitle>
+                <Button variant="outline" className="w-full">
+                  Ordina Ora
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </main>
 
-      <Dialog open={showOrderDialog} onOpenChange={setShowOrderDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">
-              Ordine {selectedCategory?.name} - Pasticceria del Borgo
-            </DialogTitle>
-          </DialogHeader>
-          {selectedCategory?.slug === 'cake-design' ? (
-            <CakeDesignForm
-              onSubmit={handleOrderSubmit}
-              onCancel={() => setShowOrderDialog(false)}
-            />
-          ) : (
-            <CategoryOrderForm
-              category={selectedCategory}
-              onSubmit={handleOrderSubmit}
-              onCancel={() => setShowOrderDialog(false)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+        <Dialog open={isOrderDialogOpen} onOpenChange={setIsOrderDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Ordina - {selectedCategory?.name}</DialogTitle>
+            </DialogHeader>
+            {selectedCategory?.slug === 'cake-design' ? (
+              <CakeDesignForm 
+                onSubmit={handleOrderSubmit}
+                category={selectedCategory}
+                customerProfile={customerProfile}
+              />
+            ) : (
+              <CategoryOrderForm 
+                onSubmit={handleOrderSubmit}
+                category={selectedCategory}
+                customerProfile={customerProfile}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
 
-      <OrderConfirmationDialog
-        isOpen={showConfirmationDialog}
-        onClose={() => setShowConfirmationDialog(false)}
-      />
+        <OrderConfirmationDialog
+          isOpen={isConfirmationDialogOpen}
+          onClose={() => setIsConfirmationDialogOpen(false)}
+        />
     </div>
   );
 };

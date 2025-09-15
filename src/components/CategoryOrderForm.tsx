@@ -31,19 +31,39 @@ interface CategoryField {
   rules?: any;
 }
 
-interface CategoryOrderFormProps {
-  category: Category | null;
-  onSubmit: (orderData: any) => void;
-  onCancel: () => void;
+interface CustomerProfile {
+  id: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  email: string | null;
 }
 
-export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrderFormProps) {
+interface CategoryOrderFormProps {
+  onSubmit: (data: any) => Promise<void>;
+  category: any;
+  customerProfile?: CustomerProfile | null;
+}
+
+export function CategoryOrderForm({ onSubmit, category, customerProfile }: CategoryOrderFormProps) {
   const [formData, setFormData] = useState({
-    name: "",
-    surname: "",
-    phone: "",
+    customerName: customerProfile?.first_name || "",
+    customerSurname: customerProfile?.last_name || "",
+    customerPhone: customerProfile?.phone || "",
     fieldValues: {} as Record<string, any>
   });
+
+  // Update form data when customerProfile changes
+  useEffect(() => {
+    if (customerProfile) {
+      setFormData(prev => ({
+        ...prev,
+        customerName: customerProfile.first_name,
+        customerSurname: customerProfile.last_name,
+        customerPhone: customerProfile.phone
+      }));
+    }
+  }, [customerProfile]);
   
   const [fields, setFields] = useState<CategoryField[]>([]);
   const [dropdownOptions, setDropdownOptions] = useState<Record<string, any[]>>({});
@@ -79,7 +99,7 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
   };
 
   const handleInputChange = (field: string, value: any) => {
-    if (['name', 'surname', 'phone'].includes(field)) {
+    if (['customerName', 'customerSurname', 'customerPhone'].includes(field)) {
       setFormData(prev => ({ ...prev, [field]: value }));
     } else {
       setFormData(prev => ({ 
@@ -129,7 +149,7 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
     e.preventDefault();
     
     // Validate required fields
-    if (!formData.name || !formData.surname || !formData.phone) {
+    if (!formData.customerName || !formData.customerSurname || !formData.customerPhone) {
       alert('Nome, cognome e telefono sono obbligatori');
       return;
     }
@@ -446,31 +466,34 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
       {/* Fixed fields: Nome, Cognome, Telefono */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b">
         <div>
-          <Label htmlFor="name">Nome *</Label>
+          <Label htmlFor="customerName">Nome *</Label>
           <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
+            id="customerName"
+            value={formData.customerName}
+            onChange={(e) => handleInputChange('customerName', e.target.value)}
             required
+            disabled={!!customerProfile}
           />
         </div>
         <div>
-          <Label htmlFor="surname">Cognome *</Label>
+          <Label htmlFor="customerSurname">Cognome *</Label>
           <Input
-            id="surname"
-            value={formData.surname}
-            onChange={(e) => handleInputChange('surname', e.target.value)}
+            id="customerSurname"
+            value={formData.customerSurname}
+            onChange={(e) => handleInputChange('customerSurname', e.target.value)}
             required
+            disabled={!!customerProfile}
           />
         </div>
         <div>
-          <Label htmlFor="phone">Telefono *</Label>
+          <Label htmlFor="customerPhone">Telefono *</Label>
           <Input
-            id="phone"
+            id="customerPhone"
             type="tel"
-            value={formData.phone}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
+            value={formData.customerPhone}
+            onChange={(e) => handleInputChange('customerPhone', e.target.value)}
             required
+            disabled={!!customerProfile}
           />
         </div>
       </div>
@@ -544,10 +567,7 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
 
       {/* Buttons */}
       <div className="flex gap-4 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-          Annulla
-        </Button>
-        <Button type="submit" className="flex-1">
+        <Button type="submit" className="w-full">
           Invia ordine
         </Button>
       </div>

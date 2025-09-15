@@ -7,6 +7,7 @@ import HomePage from "./pages/HomePage";
 import Cliente from "./pages/Cliente";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
+import CustomerAuth from "./pages/CustomerAuth";
 import NotFound from "./pages/NotFound";
 import ArchivedOrders from "./pages/ArchivedOrders";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -20,6 +21,7 @@ const App = () => (
         <Route path="/" element={<HomePage />} />
         <Route path="/cliente" element={<Cliente />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/customer-auth" element={<CustomerAuth />} />
         <Route path="/admin" element={
           <ProtectedRoute>
             <Admin />
