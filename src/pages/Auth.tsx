@@ -66,7 +66,7 @@ const Auth = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@salumeriavito.com"
+                placeholder="admin@pasticceriadelborgo.com"
                 required
               />
             </div>

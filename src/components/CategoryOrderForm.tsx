@@ -514,18 +514,18 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
         </div>
       )}
 
-      {formData.fieldValues.restaurant === 'Si' && (
+      {formData.fieldValues.is_restaurant === 'Si' && (
         <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
           <div>
-            <Label htmlFor="delivery_address">Indirizzo di consegna</Label>
+            <Label htmlFor="restaurant_name">Nome ristorante</Label>
             <Input
-              id="delivery_address"
-              value={formData.fieldValues.delivery_address || ''}
-              onChange={(e) => handleInputChange('delivery_address', e.target.value)}
+              id="restaurant_name"
+              value={formData.fieldValues.restaurant_name || ''}
+              onChange={(e) => handleInputChange('restaurant_name', e.target.value)}
             />
           </div>
           <div>
-            <Label htmlFor="restaurant_contact">Cognome referente</Label>
+            <Label htmlFor="restaurant_contact">Nome referente</Label>
             <Input
               id="restaurant_contact"
               value={formData.fieldValues.restaurant_contact || ''}

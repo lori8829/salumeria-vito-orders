@@ -167,7 +167,8 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
       is_restaurant: 'Consegna ristorante',
       print_description: 'Descrizione stampa',
       delivery_address: 'Indirizzo consegna',
-      restaurant_contact: 'Referente ristorante'
+      restaurant_contact: 'Nome referente',
+      restaurant_name: 'Nome ristorante'
     };
     return labels[fieldKey] || fieldKey.replace('_', ' ');
   };
