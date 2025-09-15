@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/Header";
 import { DropdownManager } from "@/components/DropdownManager";
+import { CategoryConfigManager } from "@/components/CategoryConfigManager";
 import { LogOut, ArrowLeft, Calendar, Package, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -61,7 +62,20 @@ const Admin = () => {
           </TabsContent>
           
           <TabsContent value="settings" className="space-y-6">
-            <DropdownManager />
+            <Tabs defaultValue="dropdowns" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="dropdowns">Gestione Opzioni</TabsTrigger>
+                <TabsTrigger value="categories">Configurazione Categorie</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="dropdowns">
+                <DropdownManager />
+              </TabsContent>
+              
+              <TabsContent value="categories">
+                <CategoryConfigManager />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </main>

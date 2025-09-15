@@ -104,6 +104,115 @@ export type Database = {
         }
         Relationships: []
       }
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          is_configurable: boolean
+          min_lead_days: number
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_configurable?: boolean
+          min_lead_days?: number
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_configurable?: boolean
+          min_lead_days?: number
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      category_daily_capacity: {
+        Row: {
+          capacity_date: string
+          category_id: string
+          created_at: string
+          current_orders: number
+          id: string
+          max_orders: number
+        }
+        Insert: {
+          capacity_date: string
+          category_id: string
+          created_at?: string
+          current_orders?: number
+          id?: string
+          max_orders?: number
+        }
+        Update: {
+          capacity_date?: string
+          category_id?: string
+          created_at?: string
+          current_orders?: number
+          id?: string
+          max_orders?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "category_daily_capacity_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      category_fields: {
+        Row: {
+          category_id: string
+          created_at: string
+          field_key: string
+          field_label: string
+          field_type: string
+          id: string
+          is_required: boolean
+          options: Json | null
+          position: number
+          rules: Json | null
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          field_key: string
+          field_label: string
+          field_type: string
+          id?: string
+          is_required?: boolean
+          options?: Json | null
+          position?: number
+          rules?: Json | null
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          field_key?: string
+          field_label?: string
+          field_type?: string
+          id?: string
+          is_required?: boolean
+          options?: Json | null
+          position?: number
+          rules?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "category_fields_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dishes: {
         Row: {
           created_at: string
@@ -154,6 +263,41 @@ export type Database = {
           },
         ]
       }
+      order_field_values: {
+        Row: {
+          created_at: string
+          field_key: string
+          field_value: string | null
+          file_url: string | null
+          id: string
+          order_id: string
+        }
+        Insert: {
+          created_at?: string
+          field_key: string
+          field_value?: string | null
+          file_url?: string | null
+          id?: string
+          order_id: string
+        }
+        Update: {
+          created_at?: string
+          field_key?: string
+          field_value?: string | null
+          file_url?: string | null
+          id?: string
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_field_values_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
@@ -193,6 +337,7 @@ export type Database = {
           base_id: string | null
           cake_design: boolean | null
           cake_type_id: string | null
+          category_id: string | null
           created_at: string
           customer_name: string | null
           customer_phone: string | null
@@ -225,6 +370,7 @@ export type Database = {
           base_id?: string | null
           cake_design?: boolean | null
           cake_type_id?: string | null
+          category_id?: string | null
           created_at?: string
           customer_name?: string | null
           customer_phone?: string | null
@@ -257,6 +403,7 @@ export type Database = {
           base_id?: string | null
           cake_design?: boolean | null
           cake_type_id?: string | null
+          category_id?: string | null
           created_at?: string
           customer_name?: string | null
           customer_phone?: string | null
@@ -283,7 +430,15 @@ export type Database = {
           tiers?: number | null
           total_items?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

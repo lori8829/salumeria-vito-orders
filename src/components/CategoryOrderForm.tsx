@@ -1,0 +1,402 @@
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  is_configurable: boolean;
+  min_lead_days: number;
+}
+
+interface CategoryField {
+  id: string;
+  field_key: string;
+  field_label: string;
+  field_type: string;
+  is_required: boolean;
+  position: number;
+  options?: any;
+  rules?: any;
+}
+
+interface CategoryOrderFormProps {
+  category: Category | null;
+  onSubmit: (orderData: any) => void;
+  onCancel: () => void;
+}
+
+export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrderFormProps) {
+  const [formData, setFormData] = useState({
+    name: "",
+    surname: "",
+    phone: "",
+    fieldValues: {} as Record<string, any>
+  });
+  
+  const [fields, setFields] = useState<CategoryField[]>([]);
+  const [dropdownOptions, setDropdownOptions] = useState<Record<string, any[]>>({});
+
+  useEffect(() => {
+    if (category) {
+      loadCategoryFields();
+      loadDropdownOptions();
+    }
+  }, [category]);
+
+  const loadCategoryFields = async () => {
+    if (!category) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('category_fields')
+        .select('*')
+        .eq('category_id', category.id)
+        .order('position');
+
+      if (error) throw error;
+      setFields(data || []);
+    } catch (error) {
+      console.error('Error loading category fields:', error);
+    }
+  };
+
+  const loadDropdownOptions = async () => {
+    try {
+      const [cakeTypes, bases, fillings, exteriors, decorations] = await Promise.all([
+        supabase.from('cake_types').select('id, name'),
+        supabase.from('cake_bases').select('id, name'),
+        supabase.from('cake_fillings').select('id, name'),
+        supabase.from('cake_exteriors').select('id, name'),
+        supabase.from('cake_decorations').select('id, name')
+      ]);
+
+      setDropdownOptions({
+        cake_type: cakeTypes.data || [],
+        base: bases.data || [],
+        filling: fillings.data || [],
+        exterior: exteriors.data || [],
+        decoration: decorations.data || []
+      });
+    } catch (error) {
+      console.error('Error loading dropdown options:', error);
+    }
+  };
+
+  const handleInputChange = (field: string, value: any) => {
+    if (['name', 'surname', 'phone'].includes(field)) {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    } else {
+      setFormData(prev => ({ 
+        ...prev, 
+        fieldValues: { ...prev.fieldValues, [field]: value }
+      }));
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate required fields
+    if (!formData.name || !formData.surname || !formData.phone) {
+      alert('Nome, cognome e telefono sono obbligatori');
+      return;
+    }
+
+    for (const field of fields) {
+      if (field.is_required && !formData.fieldValues[field.field_key]) {
+        alert(`Il campo ${field.field_label} è obbligatorio`);
+        return;
+      }
+    }
+
+    onSubmit(formData);
+  };
+
+  const isDateDisabled = (date: Date) => {
+    if (!category) return false;
+    
+    const today = new Date();
+    const minDate = new Date();
+    minDate.setDate(today.getDate() + category.min_lead_days);
+    
+    return date < minDate;
+  };
+
+  const renderField = (field: CategoryField) => {
+    const value = formData.fieldValues[field.field_key] || '';
+
+    switch (field.field_type) {
+      case 'date':
+        return (
+          <div key={field.id}>
+            <Label htmlFor={field.field_key}>
+              {field.field_label}
+              {field.is_required && ' *'}
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !value && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon />
+                  {value ? format(new Date(value), "PPP") : <span>Seleziona data</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={value ? new Date(value) : undefined}
+                  onSelect={(date) => handleInputChange(field.field_key, date?.toISOString().split('T')[0])}
+                  disabled={isDateDisabled}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        );
+
+      case 'time':
+        return (
+          <div key={field.id}>
+            <Label htmlFor={field.field_key}>
+              {field.field_label}
+              {field.is_required && ' *'}
+            </Label>
+            <Input
+              id={field.field_key}
+              type="time"
+              value={value}
+              onChange={(e) => handleInputChange(field.field_key, e.target.value)}
+              required={field.is_required}
+            />
+          </div>
+        );
+
+      case 'select':
+        const options = field.options?.items || dropdownOptions[field.field_key] || [];
+        return (
+          <div key={field.id}>
+            <Label htmlFor={field.field_key}>
+              {field.field_label}
+              {field.is_required && ' *'}
+            </Label>
+            <Select value={value} onValueChange={(val) => handleInputChange(field.field_key, val)}>
+              <SelectTrigger>
+                <SelectValue placeholder={`Seleziona ${field.field_label.toLowerCase()}`} />
+              </SelectTrigger>
+              <SelectContent>
+                {options.map((option: any) => (
+                  <SelectItem key={option.id || option.value} value={option.id || option.value}>
+                    {option.name || option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        );
+
+      case 'number':
+        return (
+          <div key={field.id}>
+            <Label htmlFor={field.field_key}>
+              {field.field_label}
+              {field.is_required && ' *'}
+            </Label>
+            <Input
+              id={field.field_key}
+              type="number"
+              min={field.rules?.min || 1}
+              max={field.rules?.max}
+              value={value}
+              onChange={(e) => handleInputChange(field.field_key, e.target.value)}
+              required={field.is_required}
+            />
+          </div>
+        );
+
+      case 'text':
+        return (
+          <div key={field.id}>
+            <Label htmlFor={field.field_key}>
+              {field.field_label}
+              {field.is_required && ' *'}
+            </Label>
+            <Input
+              id={field.field_key}
+              value={value}
+              onChange={(e) => handleInputChange(field.field_key, e.target.value)}
+              required={field.is_required}
+            />
+          </div>
+        );
+
+      case 'textarea':
+        return (
+          <div key={field.id}>
+            <Label htmlFor={field.field_key}>
+              {field.field_label}
+              {field.is_required && ' *'}
+            </Label>
+            <Textarea
+              id={field.field_key}
+              value={value}
+              onChange={(e) => handleInputChange(field.field_key, e.target.value)}
+              rows={field.rules?.rows || 3}
+              maxLength={field.rules?.maxLength}
+              required={field.is_required}
+            />
+          </div>
+        );
+
+      case 'radio':
+        return (
+          <div key={field.id}>
+            <Label>
+              {field.field_label}
+              {field.is_required && ' *'}
+            </Label>
+            <RadioGroup
+              value={value}
+              onValueChange={(val) => handleInputChange(field.field_key, val)}
+              className="flex space-x-4"
+            >
+              {(field.options?.items || []).map((option: any) => (
+                <div key={option.value} className="flex items-center space-x-2">
+                  <RadioGroupItem value={option.value} id={`${field.field_key}-${option.value}`} />
+                  <Label htmlFor={`${field.field_key}-${option.value}`}>{option.label}</Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6 max-h-[80vh] overflow-y-auto p-6">
+      {/* Fixed fields: Nome, Cognome, Telefono */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b">
+        <div>
+          <Label htmlFor="name">Nome *</Label>
+          <Input
+            id="name"
+            value={formData.name}
+            onChange={(e) => handleInputChange('name', e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="surname">Cognome *</Label>
+          <Input
+            id="surname"
+            value={formData.surname}
+            onChange={(e) => handleInputChange('surname', e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="phone">Telefono *</Label>
+          <Input
+            id="phone"
+            type="tel"
+            value={formData.phone}
+            onChange={(e) => handleInputChange('phone', e.target.value)}
+            required
+          />
+        </div>
+      </div>
+
+      {/* Dynamic fields */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {fields.map(renderField)}
+      </div>
+
+      {/* Conditional fields based on radio selections */}
+      {formData.fieldValues.print_option === 'Si' && (
+        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+          <div>
+            <Label htmlFor="print_description">Descrivi l'immagine da stampare</Label>
+            <Textarea
+              id="print_description"
+              value={formData.fieldValues.print_description || ''}
+              onChange={(e) => handleInputChange('print_description', e.target.value)}
+              rows={3}
+            />
+          </div>
+          <div>
+            <Label htmlFor="print_image">Carica immagine</Label>
+            <Input
+              id="print_image"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  handleInputChange('print_image', file.name);
+                }
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {formData.fieldValues.restaurant === 'Si' && (
+        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+          <div>
+            <Label htmlFor="delivery_address">Indirizzo di consegna</Label>
+            <Input
+              id="delivery_address"
+              value={formData.fieldValues.delivery_address || ''}
+              onChange={(e) => handleInputChange('delivery_address', e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="restaurant_contact">Cognome referente</Label>
+            <Input
+              id="restaurant_contact"
+              value={formData.fieldValues.restaurant_contact || ''}
+              onChange={(e) => handleInputChange('restaurant_contact', e.target.value)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Unified message */}
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <p className="text-sm text-blue-700">
+          Premendo 'Invia ordine' verrai ricontattato quanto prima per definire i dettagli.
+        </p>
+      </div>
+
+      {/* Buttons */}
+      <div className="flex gap-4 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
+          Annulla
+        </Button>
+        <Button type="submit" className="flex-1">
+          Invia ordine
+        </Button>
+      </div>
+    </form>
+  );
+}
