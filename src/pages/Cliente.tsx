@@ -20,7 +20,8 @@ import {
   ChefHat,
   Utensils,
   Candy,
-  LogIn
+  LogIn,
+  Sparkles
 } from "lucide-react";
 
 interface Category {
