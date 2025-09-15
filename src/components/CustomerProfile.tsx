@@ -45,7 +45,7 @@ export const CustomerProfile = ({ user, onProfileUpdate }: CustomerProfileProps)
         .from('customer_profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       
