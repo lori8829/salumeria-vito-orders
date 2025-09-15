@@ -48,6 +48,21 @@ const Cliente = () => {
 
   const handleOrderSubmit = async (orderData: any) => {
     try {
+      // Find image uploads for print_image_url
+      let printImageUrl = null;
+      if (orderData.fieldValues) {
+        // Look for image fields that should be saved as print_image_url
+        for (const [key, value] of Object.entries(orderData.fieldValues)) {
+          if (typeof value === 'string' && (value.includes('/order-images/') || value.startsWith('http'))) {
+            // If it's an image field (print_image, image, etc.), save it as print_image_url
+            if (key.toLowerCase().includes('immagine') || key.toLowerCase().includes('image') || key.toLowerCase().includes('print')) {
+              printImageUrl = value;
+              break;
+            }
+          }
+        }
+      }
+
       // Create order in database
       const orderInsertData = {
         customer_name: orderData.name,
@@ -56,6 +71,8 @@ const Cliente = () => {
         category_id: selectedCategory?.id,
         pickup_date: orderData.fieldValues?.pickup_date || null,
         pickup_time: orderData.fieldValues?.pickup_time || null,
+        print_image_url: printImageUrl,
+        print_option: printImageUrl ? true : false,
         status: 'Ricevuto',
         total_items: 1
       };
