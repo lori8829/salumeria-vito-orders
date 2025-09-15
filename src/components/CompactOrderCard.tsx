@@ -163,6 +163,13 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
     return labels[fieldKey] || fieldKey.replace('_', ' ');
   };
 
+  const getPeopleCount = () => {
+    if (order.people_count) return order.people_count;
+    
+    const peopleField = order.field_values?.find(f => f.field_key === 'people_count');
+    return peopleField?.field_value ? parseInt(peopleField.field_value) : null;
+  };
+
   return (
     <Card className={cn("transition-all duration-200", getStatusColor(order.status))}>
       {/* Compact view */}
@@ -179,21 +186,11 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
               {order.category?.name || 'Torta personalizzata'}
             </div>
             <div className="text-sm text-muted-foreground whitespace-nowrap">
-              {order.people_count ? `${order.people_count} pers.` : 'N/A'}
+              {getPeopleCount() ? `${getPeopleCount()} pers.` : 'N/A'}
             </div>
             <div className="text-sm text-muted-foreground truncate">
               {order.customer_phone || 'N/A'}
             </div>
-            {order.people_count && (
-              <div className="text-sm text-muted-foreground whitespace-nowrap">
-                {order.people_count} persone
-              </div>
-            )}
-            {order.pickup_date && (
-              <div className="text-sm text-muted-foreground whitespace-nowrap">
-                {new Date(order.pickup_date).toLocaleDateString('it-IT')}
-              </div>
-            )}
             <div className="ml-auto">
               <Select
                 value={order.status}
@@ -267,10 +264,10 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
                   </div>
                 )}
 
-                {order.people_count && (
+                {getPeopleCount() && (
                   <div>
                     <p className="font-medium text-muted-foreground">Numero persone</p>
-                    <p>{order.people_count}</p>
+                    <p>{getPeopleCount()}</p>
                   </div>
                 )}
               </div>
@@ -413,85 +410,6 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
                     </div>
                   </div>
                 )}
-
-                {/* Campi statici dal modello originale */}
-                <div className="space-y-3">
-                  <h4 className="font-medium text-foreground border-b pb-2">Informazioni aggiuntive</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    {order.pickup_date && (
-                      <div>
-                        <p className="font-medium text-muted-foreground">Data ritiro</p>
-                        <p>{formatDate(order.pickup_date)}</p>
-                      </div>
-                    )}
-
-                    {order.pickup_time && (
-                      <div>
-                        <p className="font-medium text-muted-foreground">Orario ritiro</p>
-                        <p>{order.pickup_time}</p>
-                      </div>
-                    )}
-
-                    {order.people_count && (
-                      <div>
-                        <p className="font-medium text-muted-foreground">Numero persone</p>
-                        <p>{order.people_count}</p>
-                      </div>
-                    )}
-
-                    {order.cake_design && (
-                      <div>
-                        <p className="font-medium text-muted-foreground">Cake Design</p>
-                        <p>Sì - {order.tiers} piani</p>
-                      </div>
-                    )}
-
-                    {order.allergies && (
-                      <div className="md:col-span-2">
-                        <p className="font-medium text-muted-foreground">Allergie</p>
-                        <p className="break-words">{order.allergies}</p>
-                      </div>
-                    )}
-
-                    {order.inscription && (
-                      <div className="md:col-span-2">
-                        <p className="font-medium text-muted-foreground">Scritta</p>
-                        <p className="break-words">{order.inscription}</p>
-                      </div>
-                    )}
-
-                    {order.decoration_text && (
-                      <div className="md:col-span-2">
-                        <p className="font-medium text-muted-foreground">Dettagli decorazione</p>
-                        <p className="break-words">{order.decoration_text}</p>
-                      </div>
-                    )}
-
-                    {order.print_option && (
-                      <div className="md:col-span-2">
-                        <p className="font-medium text-muted-foreground">Stampa</p>
-                        <p className="break-words">
-                          {order.print_type === 'describe' ? `Descrizione: ${order.print_description}` : 'Immagine caricata'}
-                        </p>
-                      </div>
-                    )}
-
-                    {order.needs_transport && (
-                      <div>
-                        <p className="font-medium text-muted-foreground">Trasporto</p>
-                        <p>Richiesto</p>
-                      </div>
-                    )}
-
-                    {order.is_restaurant && (
-                      <div className="md:col-span-2">
-                        <p className="font-medium text-muted-foreground">Ristorante</p>
-                        <p>Consegna: {order.delivery_address}</p>
-                        <p>Referente: {order.restaurant_contact}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
             )}
           </div>
