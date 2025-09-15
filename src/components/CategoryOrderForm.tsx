@@ -117,10 +117,13 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
     const compareDate = new Date(date);
     compareDate.setHours(0, 0, 0, 0); // Reset to start of day
     
+    // Use field-specific minLeadDays first, then fallback to category min_lead_days
+    const minLeadDays = field?.rules?.minLeadDays ?? category.min_lead_days;
+    
     // If min_lead_days is set, disable dates before today + min_lead_days
-    if (category.min_lead_days > 0) {
+    if (minLeadDays > 0) {
       const minAllowedDate = new Date(today);
-      minAllowedDate.setDate(today.getDate() + category.min_lead_days);
+      minAllowedDate.setDate(today.getDate() + minLeadDays);
       
       if (compareDate < minAllowedDate) return true;
     } else {
