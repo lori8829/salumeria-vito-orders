@@ -73,25 +73,9 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
   };
 
   const loadDropdownOptions = async () => {
-    try {
-      const [cakeTypes, bases, fillings, exteriors, decorations] = await Promise.all([
-        supabase.from('cake_types').select('id, name'),
-        supabase.from('cake_bases').select('id, name'),
-        supabase.from('cake_fillings').select('id, name'),
-        supabase.from('cake_exteriors').select('id, name'),
-        supabase.from('cake_decorations').select('id, name')
-      ]);
-
-      setDropdownOptions({
-        cake_type: cakeTypes.data || [],
-        base: bases.data || [],
-        filling: fillings.data || [],
-        exterior: exteriors.data || [],
-        decoration: decorations.data || []
-      });
-    } catch (error) {
-      console.error('Error loading dropdown options:', error);
-    }
+    // Non carichiamo più opzioni dal database
+    // Tutte le opzioni vengono dalla configurazione dei campi
+    setDropdownOptions({});
   };
 
   const handleInputChange = (field: string, value: any) => {
@@ -236,7 +220,7 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
         }
 
       case 'select':
-        const options = field.options?.items || dropdownOptions[field.field_key] || [];
+        const options = field.options?.items || [];
         return (
           <div key={field.id}>
             <Label htmlFor={field.field_key}>
@@ -249,8 +233,8 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
               </SelectTrigger>
               <SelectContent>
                 {options.map((option: any) => (
-                  <SelectItem key={option.id || option.value} value={option.id || option.value}>
-                    {option.name || option.label}
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -40,7 +40,7 @@ const AVAILABLE_FIELDS = [
   { key: 'base', label: 'Base', type: 'select', hasRules: false, needsOptions: true },
   { key: 'filling', label: 'Farcia', type: 'select', hasRules: false, needsOptions: true },
   { key: 'exterior', label: 'Esterno', type: 'select', hasRules: false, needsOptions: true },
-  { key: 'decoration', label: 'Decorazione', type: 'text', hasRules: false },
+  { key: 'decoration', label: 'Decorazione', type: 'select', hasRules: false, needsOptions: true },
   { key: 'allergies', label: 'Allergie', type: 'textarea', hasRules: false },
   { key: 'print_option', label: 'Stampa', type: 'radio', hasRules: false },
   { key: 'inscription', label: 'Scritta', type: 'text', hasRules: false },
