@@ -54,8 +54,9 @@ const Cliente = () => {
         customer_surname: orderData.surname,
         customer_phone: orderData.phone,
         category_id: selectedCategory?.id,
-        pickup_date: orderData.pickupDate || null,
-        pickup_time: orderData.pickupTime || null,
+        pickup_date: orderData.fieldValues?.pickup_date || null,
+        pickup_time: orderData.fieldValues?.pickup_time || null,
+        people_count: orderData.fieldValues?.people_count ? parseInt(orderData.fieldValues.people_count) : null,
         status: 'Ricevuto',
         total_items: 1
       };
