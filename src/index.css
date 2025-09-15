@@ -2,54 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Pasticceria del Borgo Design System 
-   Palette: Verde menta #68edd1, Rosso #9b271c, Nero #0d0402
-   UI: Card arrotondate, ombre leggere, mobile-first
+/* Pasticceria del Borgo 2025 Visionary Design System 
+   Neural-inspired palette with quantum color transitions
+   Bioluminescent accents, organic curves, spatial depth
+   Glassmorphism evolution with micro-interactions
 */
 
 @layer base {
   :root {
-    /* Brand Colors - Pasticceria del Borgo */
-    --borgo-mint: 166 71% 67%;        /* #68edd1 */
-    --borgo-red: 6 78% 35%;           /* #9b271c */
-    --borgo-dark: 13 89% 1%;          /* #0d0402 */
+    /* 2025 Visionary Color Palette */
+    --quantum-emerald: 158 64% 52%;      /* Deep emerald base */
+    --neural-coral: 14 91% 43%;          /* Vibrant coral accent */
+    --void-depth: 225 9% 9%;             /* Deep cosmic background */
+    --plasma-glow: 280 100% 70%;         /* Electric plasma accent */
+    --aurora-mint: 166 100% 75%;         /* Bright aurora mint */
+    --solar-amber: 45 100% 51%;          /* Golden solar energy */
     
-    /* Semantic Tokens */
-    --background: 0 0% 100%;
-    --foreground: 13 89% 1%;
+    /* Advanced Semantic Tokens */
+    --background: 225 15% 6%;            /* Deep space background */
+    --foreground: 210 40% 95%;           /* Bright neural text */
+    --surface: 225 12% 12%;              /* Elevated surfaces */
+    --surface-variant: 225 8% 18%;       /* Card backgrounds */
 
-    --card: 0 0% 100%;
-    --card-foreground: 13 89% 1%;
+    --card: 225 12% 12%;
+    --card-foreground: 210 40% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 13 89% 1%;
+    --popover: 225 8% 18%;
+    --popover-foreground: 210 40% 95%;
 
-    --primary: 166 71% 67%;            /* Verde menta */
-    --primary-foreground: 0 0% 100%;
+    --primary: 158 64% 52%;              /* Quantum emerald */
+    --primary-foreground: 210 40% 95%;
+    --primary-glow: 158 100% 75%;        /* Glowing variant */
 
-    --secondary: 6 78% 35%;            /* Rosso */
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 14 91% 43%;             /* Neural coral */
+    --secondary-foreground: 210 40% 95%;
+    --secondary-glow: 14 100% 60%;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 280 100% 70%;              /* Plasma glow */
+    --accent-foreground: 210 40% 95%;
 
-    --accent: 166 71% 67%;
-    --accent-foreground: 13 89% 1%;
+    --muted: 225 8% 25%;
+    --muted-foreground: 210 20% 70%;
 
-    --destructive: 6 78% 35%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 95%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 166 71% 67%;
+    --border: 225 8% 22%;
+    --input: 225 8% 18%;
+    --ring: 158 64% 52%;
 
-    --chart-1: 166 71% 67%;
-    --chart-2: 6 78% 35%;
-    --chart-3: 13 89% 1%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --warning: 45 100% 51%;              /* Solar amber */
+    --warning-foreground: 225 15% 6%;
 
-    --radius: 0.75rem;
+    /* Advanced Visual Effects */
+    --gradient-neural: linear-gradient(135deg, hsl(158 64% 52% / 0.1), hsl(280 100% 70% / 0.05));
+    --gradient-plasma: linear-gradient(45deg, hsl(280 100% 70%), hsl(158 64% 52%));
+    --gradient-aurora: linear-gradient(90deg, hsl(166 100% 75%), hsl(14 91% 43%), hsl(45 100% 51%));
+    --gradient-void: linear-gradient(180deg, hsl(225 15% 6%), hsl(225 9% 9%));
+    
+    /* Glassmorphism Effects */
+    --glass-border: hsl(210 40% 95% / 0.1);
+    --glass-backdrop: hsl(225 12% 12% / 0.7);
+    --glass-surface: hsl(225 8% 18% / 0.8);
+    
+    /* Depth & Shadows */
+    --shadow-neural: 0 8px 32px hsl(158 64% 52% / 0.15), 0 2px 8px hsl(280 100% 70% / 0.1);
+    --shadow-plasma: 0 20px 60px hsl(280 100% 70% / 0.3), 0 8px 32px hsl(158 64% 52% / 0.2);
+    --shadow-void: 0 25px 80px hsl(225 15% 6% / 0.6);
+    --shadow-glow: 0 0 20px hsl(var(--primary-glow) / 0.4);
+    
+    --radius: 1.5rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -68,40 +90,42 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
-  .dark {
-    --background: 13 89% 1%;
-    --foreground: 0 0% 98%;
+  .light {
+    /* Light Mode - Ethereal Luminosity */
+    --background: 210 100% 99%;          /* Pure ethereal white */
+    --foreground: 225 9% 9%;             /* Deep void text */
+    --surface: 210 40% 98%;
+    --surface-variant: 210 20% 95%;
 
-    --card: 13 89% 1%;
-    --card-foreground: 0 0% 98%;
+    --card: 210 40% 98%;
+    --card-foreground: 225 9% 9%;
 
-    --popover: 13 89% 1%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 210 40% 98%;
+    --popover-foreground: 225 9% 9%;
 
-    --primary: 166 71% 67%;
-    --primary-foreground: 13 89% 1%;
+    --primary: 158 64% 52%;
+    --primary-foreground: 210 100% 99%;
+    --primary-glow: 158 100% 75%;
 
-    --secondary: 6 78% 35%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 14 91% 43%;
+    --secondary-foreground: 210 100% 99%;
+    --secondary-glow: 14 100% 60%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --accent: 280 100% 70%;
+    --accent-foreground: 210 100% 99%;
 
-    --accent: 166 71% 67%;
-    --accent-foreground: 13 89% 1%;
+    --muted: 210 20% 90%;
+    --muted-foreground: 225 9% 40%;
 
-    --destructive: 6 78% 35%;
-    --destructive-foreground: 0 0% 98%;
+    --border: 210 20% 88%;
+    --input: 210 20% 95%;
+    --ring: 158 64% 52%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 166 71% 67%;
-
-    --chart-1: 166 71% 67%;
-    --chart-2: 6 78% 35%;
-    --chart-3: 13 89% 1%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Light Mode Gradients */
+    --gradient-neural: linear-gradient(135deg, hsl(158 64% 52% / 0.05), hsl(280 100% 70% / 0.03));
+    --glass-backdrop: hsl(210 40% 98% / 0.8);
+    --glass-surface: hsl(210 20% 95% / 0.9);
+    --shadow-neural: 0 8px 32px hsl(158 64% 52% / 0.08), 0 2px 8px hsl(280 100% 70% / 0.05);
   }
 }
 
@@ -111,6 +135,76 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    background-attachment: fixed;
+    background-image: var(--gradient-void);
+  }
+
+  /* Neural Glow Effects */
+  .neural-glow {
+    box-shadow: var(--shadow-neural);
+  }
+
+  .plasma-glow {
+    box-shadow: var(--shadow-plasma);
+  }
+
+  .void-depth {
+    box-shadow: var(--shadow-void);
+  }
+
+  /* Glassmorphism Components */
+  .glass-surface {
+    background: var(--glass-surface);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+  }
+
+  .glass-card {
+    background: var(--glass-backdrop);
+    backdrop-filter: blur(16px) saturate(120%);
+    border: 1px solid var(--glass-border);
+  }
+
+  /* Micro-interactions */
+  .hover-lift {
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--shadow-plasma);
+  }
+
+  /* Neural Animations */
+  .pulse-neural {
+    animation: pulse-neural 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-neural {
+    0%, 100% { 
+      box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
+    }
+    50% { 
+      box-shadow: 0 0 0 20px hsl(var(--primary) / 0);
+    }
+  }
+
+  /* Gradient Text Effect */
+  .gradient-text {
+    background: var(--gradient-aurora);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Floating Elements */
+  .float-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
   }
 }
