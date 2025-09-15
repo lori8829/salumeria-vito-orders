@@ -58,6 +58,7 @@ interface CompactOrderCardProps {
 
 const statusColors = {
   pending: "bg-yellow-50 border-yellow-200",
+  accepted: "bg-orange-50 border-orange-200",
   in_preparation: "bg-blue-50 border-blue-200", 
   ready: "bg-green-50 border-green-200",
   completed: "bg-gray-50 border-gray-200"
@@ -65,6 +66,7 @@ const statusColors = {
 
 const statusLabels = {
   pending: "Ricevuto",
+  accepted: "Accettato",
   in_preparation: "In preparazione", 
   ready: "Pronto",
   completed: "Ritirato"
@@ -157,6 +159,7 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="pending">Ricevuto</SelectItem>
+                  <SelectItem value="accepted">Accettato</SelectItem>
                   <SelectItem value="in_preparation">In preparazione</SelectItem>
                   <SelectItem value="ready">Pronto</SelectItem>
                   <SelectItem value="completed">Ritirato</SelectItem>
