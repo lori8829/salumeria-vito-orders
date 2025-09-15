@@ -89,6 +89,42 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
     }
   };
 
+  const handleFileChange = async (field: string, file: File) => {
+    if (!file) return;
+
+    try {
+      // Upload file to Supabase storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('order-images')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error('Error uploading file:', uploadError);
+        alert('Errore durante il caricamento del file');
+        return;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('order-images')
+        .getPublicUrl(filePath);
+
+      // Save the URL in form data
+      setFormData(prev => ({ 
+        ...prev, 
+        fieldValues: { ...prev.fieldValues, [field]: publicUrl }
+      }));
+
+    } catch (error) {
+      console.error('Error handling file:', error);
+      alert('Errore durante il caricamento del file');
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -465,10 +501,15 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  handleInputChange('print_image', file.name);
+                  handleFileChange('print_image', file);
                 }
               }}
             />
+            {formData.fieldValues.print_image && (
+              <p className="text-sm text-green-600 mt-1">
+                Immagine caricata con successo
+              </p>
+            )}
           </div>
         </div>
       )}

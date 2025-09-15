@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { CalendarIcon, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CakeDesignFormProps {
   onSubmit: (orderData: any) => void;
@@ -21,16 +22,45 @@ export function CakeDesignForm({ onSubmit, onCancel }: CakeDesignFormProps) {
     phone: "",
     description: "",
     pickupDate: "",
-    inspirationImage: null as File | null
+    inspirationImage: null as string | null
   });
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-    setFormData(prev => ({ ...prev, inspirationImage: file }));
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      // Upload file to Supabase storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('order-images')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error('Error uploading file:', uploadError);
+        alert('Errore durante il caricamento del file');
+        return;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('order-images')
+        .getPublicUrl(filePath);
+
+      // Save the URL in form data
+      setFormData(prev => ({ ...prev, inspirationImage: publicUrl }));
+
+    } catch (error) {
+      console.error('Error handling file:', error);
+      alert('Errore durante il caricamento del file');
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -55,7 +85,7 @@ export function CakeDesignForm({ onSubmit, onCancel }: CakeDesignFormProps) {
       pickupDate: formData.pickupDate,
       fieldValues: {
         cake_description: formData.description,
-        inspiration_image: formData.inspirationImage?.name || null
+        inspiration_image: formData.inspirationImage || null
       }
     };
 
@@ -173,8 +203,8 @@ export function CakeDesignForm({ onSubmit, onCancel }: CakeDesignFormProps) {
               <span>Scegli file</span>
             </Button>
             {formData.inspirationImage && (
-              <span className="text-sm text-muted-foreground">
-                {formData.inspirationImage.name}
+              <span className="text-sm text-green-600">
+                Immagine caricata con successo
               </span>
             )}
           </div>

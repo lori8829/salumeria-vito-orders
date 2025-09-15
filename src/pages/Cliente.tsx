@@ -74,12 +74,17 @@ const Cliente = () => {
 
       // Save field values
       if (orderData.fieldValues && orderResult) {
-        const fieldValues = Object.entries(orderData.fieldValues).map(([key, value]: [string, any]) => ({
-          order_id: orderResult.id,
-          field_key: key,
-          field_value: typeof value === 'string' ? value : JSON.stringify(value),
-          file_url: null // TODO: Handle file uploads
-        }));
+        const fieldValues = Object.entries(orderData.fieldValues).map(([key, value]: [string, any]) => {
+          // Check if the value is a URL (for uploaded files)
+          const isFileUrl = typeof value === 'string' && (value.includes('/order-images/') || value.startsWith('http'));
+          
+          return {
+            order_id: orderResult.id,
+            field_key: key,
+            field_value: isFileUrl ? null : (typeof value === 'string' ? value : JSON.stringify(value)),
+            file_url: isFileUrl ? value : null
+          };
+        });
 
         const { error: valuesError } = await supabase
           .from('order_field_values')
