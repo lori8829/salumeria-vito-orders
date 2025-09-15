@@ -299,10 +299,35 @@ export const printOrder = (order: Order) => {
         ${order.print_description ? `<div>Stampa: ${order.print_description}</div>` : ''}
         ${order.needs_transport ? '<div>Trasporto richiesto</div>' : ''}
         ${order.delivery_address ? `<div>Indirizzo: ${order.delivery_address}</div>` : ''}
-        ${order.order_field_values ? order.order_field_values.map(field => 
-          field.value && !field.file_url ? `<div>${field.key}: ${field.value}</div>` :
-          field.file_url ? `<div>${field.key}: Immagine allegata</div>` : ''
-        ).join('') : ''}
+        ${order.order_field_values ? order.order_field_values.map(field => {
+          const getFieldLabel = (fieldKey: string) => {
+            const labels: { [key: string]: string } = {
+              pickup_date: 'Data di ritiro',
+              pickup_time: 'Orario di ritiro',
+              people_count: 'Persone',
+              allergies: 'Allergie',
+              delivery_address: 'Indirizzo Consegna',
+              inscription: 'Scritta',
+              decoration_text: 'Decorazione',
+              print_description: 'Descrizione Stampa',
+              cake_design: 'Cake Design',
+              tiers: 'Piani Torta',
+              base: 'Base',
+              filling: 'Farcitura',
+              exterior: 'Esterno',
+              restaurant_contact: 'Nome referente',
+              restaurant_name: 'Nome ristorante',
+              cake_type: 'Nome torta',
+              print_option: 'Stampa',
+              needs_transport: 'La torta deve viaggiare?',
+              is_restaurant: 'Devo portarla a un ristorante? (max 25 Km)',
+              print_image: 'Stampa'
+            };
+            return labels[fieldKey] || fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1);
+          };
+          return field.value && !field.file_url ? `<div>${getFieldLabel(field.key)}: ${field.value}</div>` :
+          field.file_url ? `<div>${getFieldLabel(field.key)}: Immagine allegata</div>` : '';
+        }).join('') : ''}
       </div>
       
       <div class="border-t pt-1 text-center">
