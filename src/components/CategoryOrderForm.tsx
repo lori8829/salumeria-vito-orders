@@ -112,14 +112,25 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
     if (!category) return false;
     
     const today = new Date();
-    const minDate = new Date();
-    minDate.setDate(today.getDate() + category.min_lead_days);
+    today.setHours(0, 0, 0, 0); // Reset to start of day for accurate comparison
     
-    if (date < minDate) return true;
+    const compareDate = new Date(date);
+    compareDate.setHours(0, 0, 0, 0); // Reset to start of day
+    
+    // If min_lead_days is set, disable dates before today + min_lead_days
+    if (category.min_lead_days > 0) {
+      const minAllowedDate = new Date(today);
+      minAllowedDate.setDate(today.getDate() + category.min_lead_days);
+      
+      if (compareDate < minAllowedDate) return true;
+    } else {
+      // If no min_lead_days, at least disable past dates
+      if (compareDate < today) return true;
+    }
     
     // Check field-specific rules for unavailable dates
     if (field?.rules?.unavailableDates && field.rules.unavailableDates.length > 0) {
-      const dateString = format(date, 'yyyy-MM-dd');
+      const dateString = format(compareDate, 'yyyy-MM-dd');
       if (field.rules.unavailableDates.includes(dateString)) return true;
     }
     
@@ -152,14 +163,22 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
                   )}
                 >
                   <CalendarIcon />
-                  {value ? format(new Date(value), "PPP") : <span>Seleziona data</span>}
+                  {value ? format(new Date(value + 'T00:00:00'), "PPP") : <span>Seleziona data</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={value ? new Date(value) : undefined}
-                  onSelect={(date) => handleInputChange(field.field_key, date?.toISOString().split('T')[0])}
+                  selected={value ? new Date(value + 'T00:00:00') : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      const year = date.getFullYear();
+                      const month = String(date.getMonth() + 1).padStart(2, '0');
+                      const day = String(date.getDate()).padStart(2, '0');
+                      const localDateString = `${year}-${month}-${day}`;
+                      handleInputChange(field.field_key, localDateString);
+                    }
+                  }}
                   disabled={(date) => isDateDisabled(date, field)}
                   initialFocus
                   className="pointer-events-auto"
