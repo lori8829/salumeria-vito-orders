@@ -323,209 +323,272 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
                   </div>
                 </div>
 
-                {/* Campi dinamici dal form */}
-                {order.field_values && order.field_values.length > 0 && (
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-foreground border-b pb-2">Dettagli ordine</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                       {order.field_values.map((fieldValue, index) => (
-                         <div key={index}>
-                           <p className="font-medium text-muted-foreground capitalize">
-                             {getFieldLabel(fieldValue.field_key)}
-                           </p>
-                           {fieldValue.file_url ? (
-                             <div className="space-y-2">
-                               {isImageFile(fieldValue.file_url) ? (
-                                 <div className="space-y-2">
-                                   <img 
-                                     src={fieldValue.file_url} 
-                                     alt="Immagine caricata dal cliente"
-                                     className="max-w-full h-auto max-h-64 rounded border"
-                                     loading="lazy"
-                                   />
-                                   <div className="flex gap-2 flex-wrap">
-                                     <Dialog>
-                                       <DialogTrigger asChild>
-                                         <Button
-                                           variant="outline"
-                                           size="sm"
-                                           className="flex items-center gap-1"
-                                         >
-                                           <Eye className="h-3 w-3" />
-                                           Schermo intero
-                                         </Button>
-                                       </DialogTrigger>
-                                       <DialogContent className="max-w-[95vw] max-h-[95vh] p-2">
-                                         <div className="relative flex flex-col h-full">
-                                           <div className="flex justify-between items-center p-4 border-b">
-                                             <h3 className="font-medium">
-                                               {getFieldLabel(fieldValue.field_key)} - Ordine #{order.id.slice(0, 8)}
-                                             </h3>
-                                             <div className="flex gap-2">
-                                               <Button
-                                                 variant="outline"
-                                                 size="sm"
-                                                 onClick={() => printImage(fieldValue.file_url!)}
-                                                 className="flex items-center gap-1"
-                                               >
-                                                 <Printer className="h-3 w-3" />
-                                                 Stampa
-                                               </Button>
-                                               <Button
-                                                 variant="outline"
-                                                 size="sm"
-                                                 onClick={() => downloadFile(fieldValue.file_url!, `${fieldValue.field_key}-${order.id.slice(0, 8)}`)}
-                                                 className="flex items-center gap-1"
-                                               >
-                                                 <Download className="h-3 w-3" />
-                                                 Scarica
-                                               </Button>
-                                             </div>
-                                           </div>
-                                           <div className="flex-1 flex items-center justify-center p-4 min-h-0">
-                                             <img 
-                                               src={fieldValue.file_url} 
-                                               alt="Immagine a schermo intero"
-                                               className="max-w-full max-h-full object-contain"
-                                             />
-                                           </div>
-                                         </div>
-                                       </DialogContent>
-                                     </Dialog>
-                                     <Button
-                                       variant="outline"
-                                       size="sm"
-                                       onClick={() => printImage(fieldValue.file_url!)}
-                                       className="flex items-center gap-1"
-                                     >
-                                       <Printer className="h-3 w-3" />
-                                       Stampa
-                                     </Button>
-                                     <Button
-                                       variant="outline"
-                                       size="sm"
-                                       onClick={() => downloadFile(fieldValue.file_url!, `${fieldValue.field_key}-${order.id.slice(0, 8)}`)}
-                                       className="flex items-center gap-1"
-                                     >
-                                       <Download className="h-3 w-3" />
-                                       Scarica
-                                     </Button>
-                                   </div>
-                                 </div>
-                               ) : (
-                                 <div className="flex gap-2">
-                                   <Button
-                                     variant="outline"
-                                     size="sm"
-                                     onClick={() => window.open(fieldValue.file_url, '_blank')}
-                                     className="flex items-center gap-1"
-                                   >
-                                     <Eye className="h-3 w-3" />
-                                     Visualizza file
-                                   </Button>
-                                   <Button
-                                     variant="outline"
-                                     size="sm"
-                                     onClick={() => downloadFile(fieldValue.file_url!, `${fieldValue.field_key}-${order.id.slice(0, 8)}`)}
-                                     className="flex items-center gap-1"
-                                   >
-                                     <Download className="h-3 w-3" />
-                                     Scarica
-                                   </Button>
-                                 </div>
-                               )}
-                             </div>
-                           ) : (
-                             <p className="break-words">{fieldValue.field_value || 'N/A'}</p>
-                           )}
-                         </div>
-                       ))}
-                       
-                       {/* Aggiungi gestione dell'immagine di stampa */}
-                       {order.print_option && order.print_image_url && (
-                         <div className="md:col-span-2">
-                           <p className="font-medium text-muted-foreground">Print Image</p>
-                           <div className="space-y-2">
-                             <img 
-                               src={order.print_image_url} 
-                               alt="Immagine di stampa"
-                               className="max-w-full h-auto max-h-64 rounded border"
-                               loading="lazy"
-                             />
-                             <div className="flex gap-2 flex-wrap">
-                               <Dialog>
-                                 <DialogTrigger asChild>
-                                   <Button
-                                     variant="outline"
-                                     size="sm"
-                                     className="flex items-center gap-1"
-                                   >
-                                     <Eye className="h-3 w-3" />
-                                     Schermo intero
-                                   </Button>
-                                 </DialogTrigger>
-                                 <DialogContent className="max-w-[95vw] max-h-[95vh] p-2">
-                                   <div className="relative flex flex-col h-full">
-                                     <div className="flex justify-between items-center p-4 border-b">
-                                       <h3 className="font-medium">
-                                         Print Image - Ordine #{order.id.slice(0, 8)}
-                                       </h3>
-                                       <div className="flex gap-2">
-                                         <Button
-                                           variant="outline"
-                                           size="sm"
-                                           onClick={() => printImage(order.print_image_url!)}
-                                           className="flex items-center gap-1"
-                                         >
-                                           <Printer className="h-3 w-3" />
-                                           Stampa
-                                         </Button>
-                                         <Button
-                                           variant="outline"
-                                           size="sm"
-                                           onClick={() => downloadFile(order.print_image_url!, `print-image-${order.id.slice(0, 8)}`)}
-                                           className="flex items-center gap-1"
-                                         >
-                                           <Download className="h-3 w-3" />
-                                           Scarica
-                                         </Button>
-                                       </div>
-                                     </div>
-                                     <div className="flex-1 flex items-center justify-center p-4 min-h-0">
-                                       <img 
-                                         src={order.print_image_url} 
-                                         alt="Immagine di stampa a schermo intero"
-                                         className="max-w-full max-h-full object-contain"
-                                       />
-                                     </div>
-                                   </div>
-                                 </DialogContent>
-                               </Dialog>
-                               <Button
-                                 variant="outline"
-                                 size="sm"
-                                 onClick={() => printImage(order.print_image_url!)}
-                                 className="flex items-center gap-1"
-                               >
-                                 <Printer className="h-3 w-3" />
-                                 Stampa
-                               </Button>
-                               <Button
-                                 variant="outline"
-                                 size="sm"
-                                 onClick={() => downloadFile(order.print_image_url!, `print-image-${order.id.slice(0, 8)}`)}
-                                 className="flex items-center gap-1"
-                               >
-                                 <Download className="h-3 w-3" />
-                                 Scarica
-                               </Button>
-                             </div>
-                           </div>
-                         </div>
-                       )}
-                    </div>
+                {/* Dettagli ordine completi - SEMPRE visualizzati */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-foreground border-b pb-2">Dettagli ordine</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    
+                    {/* Data e Orario Ritiro */}
+                    {getPickupDate() && (
+                      <div>
+                        <p className="font-medium text-muted-foreground">Data Ritiro</p>
+                        <p>{formatDate(getPickupDate())}</p>
+                      </div>
+                    )}
+                    
+                    {getPickupTime() && (
+                      <div>
+                        <p className="font-medium text-muted-foreground">Orario Ritiro</p>
+                        <p>{getPickupTime()}</p>
+                      </div>
+                    )}
+                    
+                    {/* Numero persone */}
+                    {getPeopleCount() && (
+                      <div>
+                        <p className="font-medium text-muted-foreground">Persone</p>
+                        <p>{getPeopleCount()}</p>
+                      </div>
+                    )}
+                    
+                    {/* Stampa */}
+                    {order.print_option !== null && (
+                      <div>
+                        <p className="font-medium text-muted-foreground">Stampa</p>
+                        <p>{order.print_option ? 'Sì' : 'No'}</p>
+                      </div>
+                    )}
+                    
+                    {/* Allergie */}
+                    {order.allergies && (
+                      <div>
+                        <p className="font-medium text-muted-foreground">Allergie</p>
+                        <p>{order.allergies}</p>
+                      </div>
+                    )}
+                    
+                    {/* Scritta */}
+                    {order.inscription && (
+                      <div>
+                        <p className="font-medium text-muted-foreground">Scritta</p>
+                        <p>{order.inscription}</p>
+                      </div>
+                    )}
+                    
+                    {/* Consegna Ristorante */}
+                    {order.is_restaurant !== null && (
+                      <div>
+                        <p className="font-medium text-muted-foreground">Consegna Ristorante</p>
+                        <p>{order.is_restaurant ? 'Sì' : 'No'}</p>
+                      </div>
+                    )}
+                    
+                    {/* Trasporto necessario */}
+                    {order.needs_transport !== null && (
+                      <div>
+                        <p className="font-medium text-muted-foreground">Trasporto Necessario</p>
+                        <p>{order.needs_transport ? 'Sì' : 'No'}</p>
+                      </div>
+                    )}
+                    
+                    {/* Campi dinamici dal form */}
+                    {order.field_values && order.field_values.map((fieldValue, index) => (
+                      <div key={index}>
+                        <p className="font-medium text-muted-foreground capitalize">
+                          {getFieldLabel(fieldValue.field_key)}
+                        </p>
+                        {fieldValue.file_url ? (
+                          <div className="space-y-2">
+                            {isImageFile(fieldValue.file_url) ? (
+                              <div className="space-y-2">
+                                <img 
+                                  src={fieldValue.file_url} 
+                                  alt="Immagine caricata dal cliente"
+                                  className="max-w-full h-auto max-h-64 rounded border"
+                                  loading="lazy"
+                                />
+                                <div className="flex gap-2 flex-wrap">
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="flex items-center gap-1"
+                                      >
+                                        <Eye className="h-3 w-3" />
+                                        Schermo intero
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-[95vw] max-h-[95vh] p-2">
+                                      <div className="relative flex flex-col h-full">
+                                        <div className="flex justify-between items-center p-4 border-b">
+                                          <h3 className="font-medium">
+                                            {getFieldLabel(fieldValue.field_key)} - Ordine #{order.id.slice(0, 8)}
+                                          </h3>
+                                          <div className="flex gap-2">
+                                            <Button
+                                              variant="outline"
+                                              size="sm"
+                                              onClick={() => printImage(fieldValue.file_url!)}
+                                              className="flex items-center gap-1"
+                                            >
+                                              <Printer className="h-3 w-3" />
+                                              Stampa
+                                            </Button>
+                                            <Button
+                                              variant="outline"
+                                              size="sm"
+                                              onClick={() => downloadFile(fieldValue.file_url!, `${fieldValue.field_key}-${order.id.slice(0, 8)}`)}
+                                              className="flex items-center gap-1"
+                                            >
+                                              <Download className="h-3 w-3" />
+                                              Scarica
+                                            </Button>
+                                          </div>
+                                        </div>
+                                        <div className="flex-1 flex items-center justify-center p-4 min-h-0">
+                                          <img 
+                                            src={fieldValue.file_url} 
+                                            alt="Immagine a schermo intero"
+                                            className="max-w-full max-h-full object-contain"
+                                          />
+                                        </div>
+                                      </div>
+                                    </DialogContent>
+                                  </Dialog>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => printImage(fieldValue.file_url!)}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <Printer className="h-3 w-3" />
+                                    Stampa
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => downloadFile(fieldValue.file_url!, `${fieldValue.field_key}-${order.id.slice(0, 8)}`)}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <Download className="h-3 w-3" />
+                                    Scarica
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => window.open(fieldValue.file_url, '_blank')}
+                                  className="flex items-center gap-1"
+                                >
+                                  <Eye className="h-3 w-3" />
+                                  Visualizza file
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => downloadFile(fieldValue.file_url!, `${fieldValue.field_key}-${order.id.slice(0, 8)}`)}
+                                  className="flex items-center gap-1"
+                                >
+                                  <Download className="h-3 w-3" />
+                                  Scarica
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="break-words">{fieldValue.field_value || 'N/A'}</p>
+                        )}
+                      </div>
+                    ))}
+                    
+                    {/* Aggiungi gestione dell'immagine di stampa */}
+                    {order.print_option && order.print_image_url && (
+                      <div className="md:col-span-2">
+                        <p className="font-medium text-muted-foreground">Print Image</p>
+                        <div className="space-y-2">
+                          <img 
+                            src={order.print_image_url} 
+                            alt="Immagine di stampa"
+                            className="max-w-full h-auto max-h-64 rounded border"
+                            loading="lazy"
+                          />
+                          <div className="flex gap-2 flex-wrap">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex items-center gap-1"
+                                >
+                                  <Eye className="h-3 w-3" />
+                                  Schermo intero
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-[95vw] max-h-[95vh] p-2">
+                                <div className="relative flex flex-col h-full">
+                                  <div className="flex justify-between items-center p-4 border-b">
+                                    <h3 className="font-medium">
+                                      Print Image - Ordine #{order.id.slice(0, 8)}
+                                    </h3>
+                                    <div className="flex gap-2">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => printImage(order.print_image_url!)}
+                                        className="flex items-center gap-1"
+                                      >
+                                        <Printer className="h-3 w-3" />
+                                        Stampa
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => downloadFile(order.print_image_url!, `print-image-${order.id.slice(0, 8)}`)}
+                                        className="flex items-center gap-1"
+                                      >
+                                        <Download className="h-3 w-3" />
+                                        Scarica
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <div className="flex-1 flex items-center justify-center p-4 min-h-0">
+                                    <img 
+                                      src={order.print_image_url} 
+                                      alt="Immagine di stampa a schermo intero"
+                                      className="max-w-full max-h-full object-contain"
+                                    />
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => printImage(order.print_image_url!)}
+                              className="flex items-center gap-1"
+                            >
+                              <Printer className="h-3 w-3" />
+                              Stampa
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => downloadFile(order.print_image_url!, `print-image-${order.id.slice(0, 8)}`)}
+                              className="flex items-center gap-1"
+                            >
+                              <Download className="h-3 w-3" />
+                              Scarica
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             )}
           </div>
