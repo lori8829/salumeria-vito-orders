@@ -58,20 +58,20 @@ interface CompactOrderCardProps {
 }
 
 const statusColors = {
-  "Da contattare": "bg-yellow-50 border-yellow-200",
-  "Accettato": "bg-orange-50 border-orange-200",
-  "In preparazione": "bg-blue-50 border-blue-200", 
+  "Ricevuto": "bg-yellow-50 border-yellow-200",
+  "Confermato": "bg-blue-50 border-blue-200",
+  "In preparazione": "bg-orange-50 border-orange-200", 
   "Pronto": "bg-green-50 border-green-200",
-  "Ritirato": "bg-gray-50 border-gray-200",
+  "Consegnato": "bg-gray-50 border-gray-200",
   "archived": "bg-gray-100 border-gray-300"
 };
 
 const statusLabels = {
-  "Da contattare": "Da contattare",
-  "Accettato": "Accettato",
+  "Ricevuto": "Ricevuto",
+  "Confermato": "Confermato",
   "In preparazione": "In preparazione", 
   "Pronto": "Pronto",
-  "Ritirato": "Ritirato",
+  "Consegnato": "Consegnato",
   "archived": "Archiviato"
 };
 
@@ -187,11 +187,11 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Da contattare">Da contattare</SelectItem>
-                  <SelectItem value="Accettato">Accettato</SelectItem>
+                  <SelectItem value="Ricevuto">Ricevuto</SelectItem>
+                  <SelectItem value="Confermato">Confermato</SelectItem>
                   <SelectItem value="In preparazione">In preparazione</SelectItem>
                   <SelectItem value="Pronto">Pronto</SelectItem>
-                  <SelectItem value="Ritirato">Ritirato</SelectItem>
+                  <SelectItem value="Consegnato">Consegnato</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -231,7 +231,7 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
             </div>
 
             {/* Show different details based on order status */}
-            {order.status === 'Ritirato' ? (
+            {order.status === 'Consegnato' ? (
               // Essential info only for completed orders
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
@@ -259,7 +259,7 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
                 )}
               </div>
             ) : (
-              // Full details for pending/in_preparation/ready orders - TUTTE le informazioni
+              // Full details for non-completed orders - TUTTE le informazioni
               <div className="space-y-4">
                 {/* Informazioni base */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
