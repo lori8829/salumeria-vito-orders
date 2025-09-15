@@ -222,13 +222,49 @@ export function CategoryConfigManager() {
     }
   };
 
+  const handleUpdateField = async () => {
+    if (!selectedCategory || !selectedFieldKey) return;
+
+    const existingField = fields.find(f => f.field_key === selectedFieldKey);
+    if (!existingField) return;
+
+    try {
+      const { error } = await supabase
+        .from('category_fields')
+        .update({
+          is_required: isRequired,
+          options: getFieldOptions(selectedFieldKey),
+          rules: fieldRules
+        })
+        .eq('id', existingField.id);
+
+      if (error) throw error;
+
+      loadCategoryFields();
+      resetForm();
+
+      toast({
+        title: "Campo aggiornato",
+        description: "Il campo è stato aggiornato con successo"
+      });
+    } catch (error) {
+      console.error('Error updating field:', error);
+      toast({
+        title: "Errore",
+        description: "Errore durante l'aggiornamento del campo",
+        variant: "destructive"
+      });
+    }
+  };
+
   const resetForm = () => {
     setSelectedFieldKey('');
-    setFieldRules(null);
+    setFieldRules({});
     setIsRequired(false);
     setFieldOptions([]);
     setShowOptionsConfig(false);
     setNewOptionLabel('');
+    setUnavailableDates([]);
   };
 
   const handleDeleteField = async (fieldId: string) => {
@@ -291,12 +327,78 @@ export function CategoryConfigManager() {
             <div>
               <Label className="text-sm font-medium mb-3 block">Seleziona giorni non disponibili</Label>
               <div className="space-y-4">
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      const currentYear = new Date().getFullYear();
+                      const mondays = [];
+                      for (let month = 0; month < 12; month++) {
+                        const firstDay = new Date(currentYear, month, 1);
+                        const lastDay = new Date(currentYear, month + 1, 0);
+                        for (let day = firstDay; day <= lastDay; day.setDate(day.getDate() + 1)) {
+                          if (day.getDay() === 1) { // Lunedì
+                            mondays.push(new Date(day));
+                          }
+                        }
+                      }
+                      const newDates = [...unavailableDates, ...mondays];
+                      const uniqueDates = newDates.filter((date, index, self) => 
+                        index === self.findIndex(d => d.toDateString() === date.toDateString())
+                      );
+                      setUnavailableDates(uniqueDates);
+                      const dateStrings = uniqueDates.map(date => format(date, 'yyyy-MM-dd'));
+                      setFieldRules({ ...fieldRules, unavailableDates: dateStrings });
+                    }}
+                  >
+                    Tutti i Lunedì
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      const currentYear = new Date().getFullYear();
+                      const sundays = [];
+                      for (let month = 0; month < 12; month++) {
+                        const firstDay = new Date(currentYear, month, 1);
+                        const lastDay = new Date(currentYear, month + 1, 0);
+                        for (let day = firstDay; day <= lastDay; day.setDate(day.getDate() + 1)) {
+                          if (day.getDay() === 0) { // Domenica
+                            sundays.push(new Date(day));
+                          }
+                        }
+                      }
+                      const newDates = [...unavailableDates, ...sundays];
+                      const uniqueDates = newDates.filter((date, index, self) => 
+                        index === self.findIndex(d => d.toDateString() === date.toDateString())
+                      );
+                      setUnavailableDates(uniqueDates);
+                      const dateStrings = uniqueDates.map(date => format(date, 'yyyy-MM-dd'));
+                      setFieldRules({ ...fieldRules, unavailableDates: dateStrings });
+                    }}
+                  >
+                    Tutte le Domeniche
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setUnavailableDates([]);
+                      setFieldRules({ ...fieldRules, unavailableDates: [] });
+                    }}
+                  >
+                    Azzera tutto
+                  </Button>
+                </div>
                 <Calendar
                   mode="multiple"
                   selected={unavailableDates}
                   onSelect={(dates) => {
                     setUnavailableDates(dates || []);
-                    // Salva le date come array di stringhe ISO nel formato fieldRules
                     const dateStrings = (dates || []).map(date => format(date, 'yyyy-MM-dd'));
                     setFieldRules({ ...fieldRules, unavailableDates: dateStrings });
                   }}
@@ -324,17 +426,64 @@ export function CategoryConfigManager() {
         );
       case 'time':
         return (
-          <div className="space-y-2">
-            <Label>Fasce orarie disponibili (una per riga, formato HH:MM)</Label>
-            <Textarea
-              placeholder="09:00&#10;10:00&#10;11:00&#10;15:00&#10;16:00"
-              rows={5}
-              value={fieldRules?.availableTimeSlots?.join('\n') || ''}
-              onChange={(e) => setFieldRules({ 
-                ...fieldRules, 
-                availableTimeSlots: e.target.value.split('\n').filter(t => t.trim()) 
-              })}
-            />
+          <div className="space-y-4">
+            <Label>Configurazione Fasce Orarie</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Fascia Mattina (Lunedì-Sabato)</Label>
+                <div className="flex gap-2 items-center">
+                  <Input
+                    type="time"
+                    placeholder="08:00"
+                    value={fieldRules?.morningStart || ''}
+                    onChange={(e) => setFieldRules({ ...fieldRules, morningStart: e.target.value })}
+                  />
+                  <span>-</span>
+                  <Input
+                    type="time"
+                    placeholder="13:00"
+                    value={fieldRules?.morningEnd || ''}
+                    onChange={(e) => setFieldRules({ ...fieldRules, morningEnd: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Fascia Pomeriggio (Lunedì-Sabato)</Label>
+                <div className="flex gap-2 items-center">
+                  <Input
+                    type="time"
+                    placeholder="15:00"
+                    value={fieldRules?.afternoonStart || ''}
+                    onChange={(e) => setFieldRules({ ...fieldRules, afternoonStart: e.target.value })}
+                  />
+                  <span>-</span>
+                  <Input
+                    type="time"
+                    placeholder="19:00"
+                    value={fieldRules?.afternoonEnd || ''}
+                    onChange={(e) => setFieldRules({ ...fieldRules, afternoonEnd: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+            <div>
+              <Label>Domenica (solo mattina)</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  type="time"
+                  placeholder="08:00"
+                  value={fieldRules?.sundayStart || ''}
+                  onChange={(e) => setFieldRules({ ...fieldRules, sundayStart: e.target.value })}
+                />
+                <span>-</span>
+                <Input
+                  type="time"
+                  placeholder="13:00"
+                  value={fieldRules?.sundayEnd || ''}
+                  onChange={(e) => setFieldRules({ ...fieldRules, sundayEnd: e.target.value })}
+                />
+              </div>
+            </div>
           </div>
         );
       case 'number':
@@ -366,6 +515,29 @@ export function CategoryConfigManager() {
       default:
         return null;
     }
+  };
+
+  const handleEditField = (field: CategoryField) => {
+    setSelectedFieldKey(field.field_key);
+    setIsRequired(field.is_required);
+    setFieldRules(field.rules || {});
+    setFieldOptions(field.options?.items || []);
+    
+    const fieldTemplate = AVAILABLE_FIELDS.find(f => f.key === field.field_key);
+    if (fieldTemplate?.needsOptions) {
+      setShowOptionsConfig(true);
+    }
+    
+    // Load unavailable dates for calendar
+    if (field.rules?.unavailableDates) {
+      const dates = field.rules.unavailableDates.map((dateStr: string) => new Date(dateStr));
+      setUnavailableDates(dates);
+    }
+    
+    toast({
+      title: "Campo caricato per modifica",
+      description: "Modifica i parametri e clicca 'Aggiorna Campo' per salvare."
+    });
   };
 
   const completeForm = () => {
@@ -475,10 +647,17 @@ export function CategoryConfigManager() {
                       </Card>
                     )}
 
-                    <Button onClick={handleAddField} className="w-full" disabled={showOptionsConfig && fieldOptions.length === 0}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Aggiungi Campo
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button onClick={handleAddField} className="flex-1" disabled={showOptionsConfig && fieldOptions.length === 0}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Aggiungi Campo
+                      </Button>
+                      {fields.some(f => f.field_key === selectedFieldKey) && (
+                        <Button onClick={handleUpdateField} variant="secondary" className="flex-1">
+                          Aggiorna Campo
+                        </Button>
+                      )}
+                    </div>
                   </>
                 )}
               </CardContent>
@@ -506,10 +685,18 @@ export function CategoryConfigManager() {
                               {field.field_type} 
                               {field.is_required && ' • Obbligatorio'}
                               {field.rules && Object.keys(field.rules).length > 0 && ' • Con regole'}
+                              {field.options?.items && field.options.items.length > 0 && ` • ${field.options.items.length} opzioni`}
                             </div>
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => handleEditField(field)}
+                          >
+                            Modifica
+                          </Button>
                           <Button
                             size="sm"
                             variant="outline"

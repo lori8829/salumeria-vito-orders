@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { CategoryOrderForm } from "@/components/CategoryOrderForm";
 import { CakeDesignForm } from "@/components/CakeDesignForm";
@@ -21,13 +21,25 @@ const Cliente = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [showOrderDialog, setShowOrderDialog] = useState(false);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  const categories: Category[] = [
-    { id: '1', name: 'TORTE IN VETRINA', slug: 'torte-in-vetrina', is_configurable: true, min_lead_days: 0 },
-    { id: '2', name: 'TORTE DA FORNO', slug: 'torte-da-forno', is_configurable: true, min_lead_days: 0 },
-    { id: '3', name: 'CROSTATE', slug: 'crostate', is_configurable: true, min_lead_days: 0 },
-    { id: '4', name: 'CAKE DESIGN', slug: 'cake-design', is_configurable: false, min_lead_days: 7 }
-  ];
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name');
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
 
   const handleCategorySelect = (category: Category) => {
     setSelectedCategory(category);

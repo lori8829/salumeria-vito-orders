@@ -117,11 +117,10 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
     
     if (date < minDate) return true;
     
-    // Check field-specific rules
-    if (field?.rules?.unavailableDays) {
-      const day = date.getDate();
-      const unavailableDays = field.rules.unavailableDays.split(',').map((d: string) => parseInt(d.trim()));
-      if (unavailableDays.includes(day)) return true;
+    // Check field-specific rules for unavailable dates
+    if (field?.rules?.unavailableDates && field.rules.unavailableDates.length > 0) {
+      const dateString = format(date, 'yyyy-MM-dd');
+      if (field.rules.unavailableDates.includes(dateString)) return true;
     }
     
     return false;
@@ -167,37 +166,72 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
                 />
               </PopoverContent>
             </Popover>
-            {field.rules?.unavailableDays && (
+            {field.rules?.unavailableDates && field.rules.unavailableDates.length > 0 && (
               <p className="text-xs text-muted-foreground mt-1">
-                Non disponibile nei giorni: {field.rules.unavailableDays} del mese
+                Giorni non disponibili configurati dall'amministratore
               </p>
             )}
           </div>
         );
 
       case 'time':
-        const availableTimeSlots = field.rules?.availableTimeSlots;
+        const rules = field.rules;
         
-        if (availableTimeSlots && availableTimeSlots.length > 0) {
-          // Show as select dropdown if admin configured specific time slots
+        if (rules && (rules.morningStart || rules.afternoonStart || rules.sundayStart)) {
+          // Generate time slots based on configured rules
+          const generateTimeSlots = () => {
+            const slots: string[] = [];
+            const selectedDate = formData.fieldValues.pickup_date;
+            
+            if (selectedDate) {
+              const pickupDate = new Date(selectedDate);
+              const dayOfWeek = pickupDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+              
+              if (dayOfWeek === 0) {
+                // Domenica - solo mattina
+                if (rules.sundayStart && rules.sundayEnd) {
+                  slots.push(`${rules.sundayStart} - ${rules.sundayEnd} (Mattina)`);
+                }
+              } else {
+                // Lunedì-Sabato - mattina e pomeriggio
+                if (rules.morningStart && rules.morningEnd) {
+                  slots.push(`${rules.morningStart} - ${rules.morningEnd} (Mattina)`);
+                }
+                if (rules.afternoonStart && rules.afternoonEnd) {
+                  slots.push(`${rules.afternoonStart} - ${rules.afternoonEnd} (Pomeriggio)`);
+                }
+              }
+            }
+            
+            return slots;
+          };
+
+          const availableSlots = generateTimeSlots();
+          
           return (
             <div key={field.id}>
               <Label htmlFor={field.field_key}>
                 {field.field_label}
                 {field.is_required && ' *'}
               </Label>
-              <Select value={value} onValueChange={(val) => handleInputChange(field.field_key, val)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleziona orario" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableTimeSlots.map((timeSlot: string) => (
-                    <SelectItem key={timeSlot} value={timeSlot}>
-                      {timeSlot}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {availableSlots.length > 0 ? (
+                <Select value={value} onValueChange={(val) => handleInputChange(field.field_key, val)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleziona fascia oraria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableSlots.map((slot) => (
+                      <SelectItem key={slot} value={slot}>
+                        {slot}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Seleziona prima una data di ritiro per visualizzare gli orari disponibili
+                </p>
+              )}
             </div>
           );
         } else {
