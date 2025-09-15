@@ -123,6 +123,39 @@ export type Database = {
           },
         ]
       }
+      customer_profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          phone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          phone: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          phone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       order_field_values: {
         Row: {
           created_at: string
@@ -223,6 +256,7 @@ export type Database = {
           status: string
           tiers: number | null
           total_items: number
+          user_id: string | null
         }
         Insert: {
           allergies?: string | null
@@ -256,6 +290,7 @@ export type Database = {
           status?: string
           tiers?: number | null
           total_items?: number
+          user_id?: string | null
         }
         Update: {
           allergies?: string | null
@@ -289,6 +324,7 @@ export type Database = {
           status?: string
           tiers?: number | null
           total_items?: number
+          user_id?: string | null
         }
         Relationships: [
           {
