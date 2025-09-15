@@ -110,8 +110,8 @@ const Cliente = () => {
 
       if (orderError) throw orderError;
 
-      // If it's cake design, handle additional fields
-      if (selectedCategory?.slug === 'cake-design' && orderData.fieldValues) {
+      // Handle additional fields for all categories
+      if (orderData.fieldValues) {
         const fieldValues = Object.entries(orderData.fieldValues).map(([key, value]: [string, any]) => {
           const isFileUrl = typeof value === 'string' && (value.includes('/order-images/') || value.startsWith('http'));
           

@@ -173,6 +173,20 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
     return labels[fieldKey] || fieldKey.replace('_', ' ');
   };
 
+  const getPickupDate = () => {
+    if (order.pickup_date) return order.pickup_date;
+    
+    const pickupDateField = order.field_values?.find(f => f.field_key === 'pickup_date');
+    return pickupDateField?.field_value || null;
+  };
+
+  const getPickupTime = () => {
+    if (order.pickup_time) return order.pickup_time;
+    
+    const pickupTimeField = order.field_values?.find(f => f.field_key === 'pickup_time');
+    return pickupTimeField?.field_value || null;
+  };
+
   const getPeopleCount = () => {
     if (order.people_count) return order.people_count;
     
@@ -187,7 +201,7 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <div className="text-sm text-muted-foreground whitespace-nowrap">
-              {formatDate(order.pickup_date || order.date)} - {order.pickup_time || 'N/A'}
+              {formatDate(getPickupDate() || order.date)} - {getPickupTime() || 'N/A'}
             </div>
             <div className="font-medium truncate">
               {order.customer_name} {order.customer_surname}
@@ -276,10 +290,10 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
                   <p>{order.category?.name || 'Torta personalizzata'}</p>
                 </div>
                 
-                {order.pickup_date && (
+                {getPickupDate() && (
                   <div>
                     <p className="font-medium text-muted-foreground">Data consegna</p>
-                    <p>{formatDate(order.pickup_date)}</p>
+                    <p>{formatDate(getPickupDate())}</p>
                   </div>
                 )}
 
