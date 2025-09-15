@@ -58,19 +58,21 @@ interface CompactOrderCardProps {
 }
 
 const statusColors = {
-  pending: "bg-yellow-50 border-yellow-200",
-  accepted: "bg-orange-50 border-orange-200",
-  in_preparation: "bg-blue-50 border-blue-200", 
-  ready: "bg-green-50 border-green-200",
-  completed: "bg-gray-50 border-gray-200"
+  "Da contattare": "bg-yellow-50 border-yellow-200",
+  "Accettato": "bg-orange-50 border-orange-200",
+  "In preparazione": "bg-blue-50 border-blue-200", 
+  "Pronto": "bg-green-50 border-green-200",
+  "Ritirato": "bg-gray-50 border-gray-200",
+  "archived": "bg-gray-100 border-gray-300"
 };
 
 const statusLabels = {
-  pending: "Ricevuto",
-  accepted: "Accettato",
-  in_preparation: "In preparazione", 
-  ready: "Pronto",
-  completed: "Ritirato"
+  "Da contattare": "Da contattare",
+  "Accettato": "Accettato",
+  "In preparazione": "In preparazione", 
+  "Pronto": "Pronto",
+  "Ritirato": "Ritirato",
+  "archived": "Archiviato"
 };
 
 export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }: CompactOrderCardProps) {
@@ -185,11 +187,11 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pending">Ricevuto</SelectItem>
-                  <SelectItem value="accepted">Accettato</SelectItem>
-                  <SelectItem value="in_preparation">In preparazione</SelectItem>
-                  <SelectItem value="ready">Pronto</SelectItem>
-                  <SelectItem value="completed">Ritirato</SelectItem>
+                  <SelectItem value="Da contattare">Da contattare</SelectItem>
+                  <SelectItem value="Accettato">Accettato</SelectItem>
+                  <SelectItem value="In preparazione">In preparazione</SelectItem>
+                  <SelectItem value="Pronto">Pronto</SelectItem>
+                  <SelectItem value="Ritirato">Ritirato</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -229,7 +231,7 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
             </div>
 
             {/* Show different details based on order status */}
-            {order.status === 'completed' ? (
+            {order.status === 'Ritirato' ? (
               // Essential info only for completed orders
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
