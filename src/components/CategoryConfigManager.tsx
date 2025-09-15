@@ -402,10 +402,22 @@ export function CategoryConfigManager() {
                     const dateStrings = (dates || []).map(date => format(date, 'yyyy-MM-dd'));
                     setFieldRules({ ...fieldRules, unavailableDates: dateStrings });
                   }}
+                  disabled={(date) => {
+                    const today = new Date();
+                    const leadDays = fieldRules?.minLeadDays || 0;
+                    
+                    // Calculate the minimum selectable date
+                    const minDate = new Date();
+                    minDate.setDate(today.getDate() + leadDays);
+                    
+                    // Disable dates that are before the minimum lead time
+                    return date < minDate;
+                  }}
                   className={cn("rounded-md border p-3 pointer-events-auto")}
                   classNames={{
                     day_selected: "bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground",
                     day: "h-8 w-8 p-0 font-normal hover:bg-muted rounded-md",
+                    day_disabled: "text-muted-foreground opacity-50 cursor-not-allowed",
                   }}
                 />
                 {unavailableDates.length > 0 && (
