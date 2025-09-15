@@ -124,14 +124,23 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
     onSubmit(formData);
   };
 
-  const isDateDisabled = (date: Date) => {
+  const isDateDisabled = (date: Date, field?: CategoryField) => {
     if (!category) return false;
     
     const today = new Date();
     const minDate = new Date();
     minDate.setDate(today.getDate() + category.min_lead_days);
     
-    return date < minDate;
+    if (date < minDate) return true;
+    
+    // Check field-specific rules
+    if (field?.rules?.unavailableDays) {
+      const day = date.getDate();
+      const unavailableDays = field.rules.unavailableDays.split(',').map((d: string) => parseInt(d.trim()));
+      if (unavailableDays.includes(day)) return true;
+    }
+    
+    return false;
   };
 
   const renderField = (field: CategoryField) => {
@@ -144,6 +153,11 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
             <Label htmlFor={field.field_key}>
               {field.field_label}
               {field.is_required && ' *'}
+              {field.rules?.minLeadDays && (
+                <span className="text-sm text-muted-foreground ml-2">
+                  (minimo {field.rules.minLeadDays} giorni di preavviso)
+                </span>
+              )}
             </Label>
             <Popover>
               <PopoverTrigger asChild>
@@ -163,31 +177,63 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
                   mode="single"
                   selected={value ? new Date(value) : undefined}
                   onSelect={(date) => handleInputChange(field.field_key, date?.toISOString().split('T')[0])}
-                  disabled={isDateDisabled}
+                  disabled={(date) => isDateDisabled(date, field)}
                   initialFocus
                   className="pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>
+            {field.rules?.unavailableDays && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Non disponibile nei giorni: {field.rules.unavailableDays} del mese
+              </p>
+            )}
           </div>
         );
 
       case 'time':
-        return (
-          <div key={field.id}>
-            <Label htmlFor={field.field_key}>
-              {field.field_label}
-              {field.is_required && ' *'}
-            </Label>
-            <Input
-              id={field.field_key}
-              type="time"
-              value={value}
-              onChange={(e) => handleInputChange(field.field_key, e.target.value)}
-              required={field.is_required}
-            />
-          </div>
-        );
+        const availableTimeSlots = field.rules?.availableTimeSlots;
+        
+        if (availableTimeSlots && availableTimeSlots.length > 0) {
+          // Show as select dropdown if admin configured specific time slots
+          return (
+            <div key={field.id}>
+              <Label htmlFor={field.field_key}>
+                {field.field_label}
+                {field.is_required && ' *'}
+              </Label>
+              <Select value={value} onValueChange={(val) => handleInputChange(field.field_key, val)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleziona orario" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableTimeSlots.map((timeSlot: string) => (
+                    <SelectItem key={timeSlot} value={timeSlot}>
+                      {timeSlot}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          );
+        } else {
+          // Default time input if no specific slots configured
+          return (
+            <div key={field.id}>
+              <Label htmlFor={field.field_key}>
+                {field.field_label}
+                {field.is_required && ' *'}
+              </Label>
+              <Input
+                id={field.field_key}
+                type="time"
+                value={value}
+                onChange={(e) => handleInputChange(field.field_key, e.target.value)}
+                required={field.is_required}
+              />
+            </div>
+          );
+        }
 
       case 'select':
         const options = field.options?.items || dropdownOptions[field.field_key] || [];

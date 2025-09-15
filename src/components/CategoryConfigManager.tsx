@@ -33,13 +33,13 @@ interface CategoryField {
 
 const AVAILABLE_FIELDS = [
   { key: 'pickup_date', label: 'Data di ritiro', type: 'date', hasRules: true },
-  { key: 'pickup_time', label: 'Orario di ritiro', type: 'time', hasRules: false },
+  { key: 'pickup_time', label: 'Orario di ritiro', type: 'time', hasRules: true },
   { key: 'piani', label: 'Piani', type: 'select', hasRules: false },
-  { key: 'cake_type', label: 'Nome torta', type: 'select', hasRules: false },
+  { key: 'cake_type', label: 'Nome torta', type: 'select', hasRules: false, needsOptions: true },
   { key: 'people_count', label: 'Persone', type: 'number', hasRules: true },
-  { key: 'base', label: 'Base', type: 'select', hasRules: false },
-  { key: 'filling', label: 'Farcia', type: 'select', hasRules: false },
-  { key: 'exterior', label: 'Esterno', type: 'select', hasRules: false },
+  { key: 'base', label: 'Base', type: 'select', hasRules: false, needsOptions: true },
+  { key: 'filling', label: 'Farcia', type: 'select', hasRules: false, needsOptions: true },
+  { key: 'exterior', label: 'Esterno', type: 'select', hasRules: false, needsOptions: true },
   { key: 'decoration', label: 'Decorazione', type: 'text', hasRules: false },
   { key: 'allergies', label: 'Allergie', type: 'textarea', hasRules: false },
   { key: 'print_option', label: 'Stampa', type: 'radio', hasRules: false },
@@ -51,15 +51,8 @@ const AVAILABLE_FIELDS = [
 const SELECT_OPTIONS = {
   piani: [
     { value: '1', label: '1 Piano' },
-    { value: '2', label: '2 Piani' },
-    { value: '3', label: '3 Piani' },
-    { value: '4', label: '4 Piani' },
-    { value: '5', label: '5 Piani' }
-  ],
-  cake_type: 'Da database cake_types',
-  base: 'Da database cake_bases',
-  filling: 'Da database cake_fillings',
-  exterior: 'Da database cake_exteriors'
+    { value: '2', label: '2 Piani' }
+  ]
 };
 
 export function CategoryConfigManager() {
@@ -69,6 +62,10 @@ export function CategoryConfigManager() {
   const [selectedFieldKey, setSelectedFieldKey] = useState<string>('');
   const [fieldRules, setFieldRules] = useState<any>(null);
   const [isRequired, setIsRequired] = useState(false);
+  const [fieldOptions, setFieldOptions] = useState<any[]>([]);
+  const [showOptionsConfig, setShowOptionsConfig] = useState(false);
+  const [newOptionValue, setNewOptionValue] = useState('');
+  const [newOptionLabel, setNewOptionLabel] = useState('');
   
   const { toast } = useToast();
 
@@ -166,9 +163,7 @@ export function CategoryConfigManager() {
       if (error) throw error;
 
       setFields(prev => [...prev, data]);
-      setSelectedFieldKey('');
-      setFieldRules(null);
-      setIsRequired(false);
+      resetForm();
 
       toast({
         title: "Campo aggiunto",
@@ -195,8 +190,44 @@ export function CategoryConfigManager() {
       case 'piani':
         return { items: SELECT_OPTIONS.piani };
       default:
-        return null;
+        // For dynamic fields, use configured options
+        return fieldOptions.length > 0 ? { items: fieldOptions } : null;
     }
+  };
+
+  const addFieldOption = () => {
+    if (!newOptionValue || !newOptionLabel) return;
+    
+    setFieldOptions(prev => [...prev, { value: newOptionValue, label: newOptionLabel }]);
+    setNewOptionValue('');
+    setNewOptionLabel('');
+  };
+
+  const removeFieldOption = (index: number) => {
+    setFieldOptions(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleFieldSelection = (fieldKey: string) => {
+    setSelectedFieldKey(fieldKey);
+    setFieldRules(null);
+    setFieldOptions([]);
+    
+    const fieldTemplate = AVAILABLE_FIELDS.find(f => f.key === fieldKey);
+    if (fieldTemplate?.needsOptions) {
+      setShowOptionsConfig(true);
+    } else {
+      setShowOptionsConfig(false);
+    }
+  };
+
+  const resetForm = () => {
+    setSelectedFieldKey('');
+    setFieldRules(null);
+    setIsRequired(false);
+    setFieldOptions([]);
+    setShowOptionsConfig(false);
+    setNewOptionValue('');
+    setNewOptionLabel('');
   };
 
   const handleDeleteField = async (fieldId: string) => {
@@ -246,13 +277,38 @@ export function CategoryConfigManager() {
     switch (fieldTemplate.type) {
       case 'date':
         return (
+          <div className="space-y-4">
+            <div>
+              <Label>Preavviso minimo (giorni)</Label>
+              <Input
+                type="number"
+                placeholder="0"
+                value={fieldRules?.minLeadDays || ''}
+                onChange={(e) => setFieldRules({ ...fieldRules, minLeadDays: parseInt(e.target.value) || 0 })}
+              />
+            </div>
+            <div>
+              <Label>Giorni non disponibili (separati da virgola, es: 1,15,25 per primo, 15esimo e 25esimo del mese)</Label>
+              <Input
+                placeholder="1,15,25"
+                value={fieldRules?.unavailableDays || ''}
+                onChange={(e) => setFieldRules({ ...fieldRules, unavailableDays: e.target.value })}
+              />
+            </div>
+          </div>
+        );
+      case 'time':
+        return (
           <div className="space-y-2">
-            <Label>Preavviso minimo (giorni)</Label>
-            <Input
-              type="number"
-              placeholder="0"
-              value={fieldRules?.minLeadDays || ''}
-              onChange={(e) => setFieldRules({ ...fieldRules, minLeadDays: parseInt(e.target.value) || 0 })}
+            <Label>Fasce orarie disponibili (una per riga, formato HH:MM)</Label>
+            <Textarea
+              placeholder="09:00&#10;10:00&#10;11:00&#10;15:00&#10;16:00"
+              rows={5}
+              value={fieldRules?.availableTimeSlots?.join('\n') || ''}
+              onChange={(e) => setFieldRules({ 
+                ...fieldRules, 
+                availableTimeSlots: e.target.value.split('\n').filter(t => t.trim()) 
+              })}
             />
           </div>
         );
@@ -327,7 +383,7 @@ export function CategoryConfigManager() {
               <CardContent className="space-y-4">
                 <div>
                   <Label>Seleziona Campo da Aggiungere</Label>
-                  <Select value={selectedFieldKey} onValueChange={setSelectedFieldKey}>
+                  <Select value={selectedFieldKey} onValueChange={handleFieldSelection}>
                     <SelectTrigger>
                       <SelectValue placeholder="Scegli un campo..." />
                     </SelectTrigger>
@@ -355,7 +411,56 @@ export function CategoryConfigManager() {
 
                     {getFieldRulesUI(selectedFieldKey)}
 
-                    <Button onClick={handleAddField} className="w-full">
+                    {showOptionsConfig && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">Configura Opzioni</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label>Valore</Label>
+                              <Input
+                                value={newOptionValue}
+                                onChange={(e) => setNewOptionValue(e.target.value)}
+                                placeholder="es. margherita"
+                              />
+                            </div>
+                            <div>
+                              <Label>Etichetta</Label>
+                              <Input
+                                value={newOptionLabel}
+                                onChange={(e) => setNewOptionLabel(e.target.value)}
+                                placeholder="es. Margherita"
+                              />
+                            </div>
+                          </div>
+                          <Button onClick={addFieldOption} size="sm" className="w-full">
+                            Aggiungi Opzione
+                          </Button>
+                          
+                          {fieldOptions.length > 0 && (
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Opzioni configurate:</Label>
+                              {fieldOptions.map((option, index) => (
+                                <div key={index} className="flex items-center justify-between p-2 border rounded">
+                                  <span>{option.label}</span>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => removeFieldOption(index)}
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    <Button onClick={handleAddField} className="w-full" disabled={showOptionsConfig && fieldOptions.length === 0}>
                       <Plus className="h-4 w-4 mr-2" />
                       Aggiungi Campo
                     </Button>
