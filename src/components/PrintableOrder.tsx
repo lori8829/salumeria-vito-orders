@@ -53,9 +53,9 @@ export const PrintableOrder: React.FC<PrintableOrderProps> = ({ order }) => {
 
   const getFieldLabel = (fieldKey: string) => {
     const labels: { [key: string]: string } = {
-      pickup_date: 'Data Ritiro',
-      pickup_time: 'Ora Ritiro',
-      people_count: 'Numero Persone',
+      pickup_date: 'Data di ritiro',
+      pickup_time: 'Orario di ritiro',
+      people_count: 'Persone',
       allergies: 'Allergie',
       delivery_address: 'Indirizzo Consegna',
       inscription: 'Scritta',
@@ -67,7 +67,12 @@ export const PrintableOrder: React.FC<PrintableOrderProps> = ({ order }) => {
       filling: 'Farcitura',
       exterior: 'Esterno',
       restaurant_contact: 'Nome referente',
-      restaurant_name: 'Nome ristorante'
+      restaurant_name: 'Nome ristorante',
+      cake_type: 'Nome torta',
+      print_option: 'Stampa',
+      needs_transport: 'La torta deve viaggiare?',
+      is_restaurant: 'Devo portarla a un ristorante? (max 25 Km)',
+      print_image: 'Stampa'
     };
     return labels[fieldKey] || fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1);
   };
