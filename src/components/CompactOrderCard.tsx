@@ -3,7 +3,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronUp, Trash2, Archive, Download, Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { ChevronDown, ChevronUp, Trash2, Archive, Download, Eye, Printer, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface OrderFieldValue {
@@ -74,6 +75,32 @@ const statusLabels = {
 
 export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }: CompactOrderCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const printImage = (imageUrl: string) => {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Stampa Immagine</title>
+            <style>
+              body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+              img { max-width: 100%; max-height: 100%; object-fit: contain; }
+              @media print { 
+                body { margin: 0; }
+                img { width: 100%; height: auto; }
+              }
+            </style>
+          </head>
+          <body>
+            <img src="${imageUrl}" alt="Immagine da stampare" onload="window.print(); window.close();" />
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+  };
 
   const isImageFile = (url: string) => {
     const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
@@ -268,15 +295,63 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
                                     className="max-w-full h-auto max-h-64 rounded border"
                                     loading="lazy"
                                   />
-                                  <div className="flex gap-2">
+                                  <div className="flex gap-2 flex-wrap">
+                                    <Dialog>
+                                      <DialogTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="flex items-center gap-1"
+                                        >
+                                          <Eye className="h-3 w-3" />
+                                          Schermo intero
+                                        </Button>
+                                      </DialogTrigger>
+                                      <DialogContent className="max-w-[95vw] max-h-[95vh] p-2">
+                                        <div className="relative flex flex-col h-full">
+                                          <div className="flex justify-between items-center p-4 border-b">
+                                            <h3 className="font-medium">
+                                              {getFieldLabel(fieldValue.field_key)} - Ordine #{order.id.slice(0, 8)}
+                                            </h3>
+                                            <div className="flex gap-2">
+                                              <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => printImage(fieldValue.file_url!)}
+                                                className="flex items-center gap-1"
+                                              >
+                                                <Printer className="h-3 w-3" />
+                                                Stampa
+                                              </Button>
+                                              <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => downloadFile(fieldValue.file_url!, `${fieldValue.field_key}-${order.id.slice(0, 8)}`)}
+                                                className="flex items-center gap-1"
+                                              >
+                                                <Download className="h-3 w-3" />
+                                                Scarica
+                                              </Button>
+                                            </div>
+                                          </div>
+                                          <div className="flex-1 flex items-center justify-center p-4 min-h-0">
+                                            <img 
+                                              src={fieldValue.file_url} 
+                                              alt="Immagine a schermo intero"
+                                              className="max-w-full max-h-full object-contain"
+                                            />
+                                          </div>
+                                        </div>
+                                      </DialogContent>
+                                    </Dialog>
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => window.open(fieldValue.file_url, '_blank')}
+                                      onClick={() => printImage(fieldValue.file_url!)}
                                       className="flex items-center gap-1"
                                     >
-                                      <Eye className="h-3 w-3" />
-                                      Visualizza
+                                      <Printer className="h-3 w-3" />
+                                      Stampa
                                     </Button>
                                     <Button
                                       variant="outline"
