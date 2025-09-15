@@ -7,9 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, GripVertical } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Plus, Trash2, GripVertical, CalendarIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface Category {
   id: string;
@@ -60,7 +63,8 @@ export function CategoryConfigManager() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [fields, setFields] = useState<CategoryField[]>([]);
   const [selectedFieldKey, setSelectedFieldKey] = useState<string>('');
-  const [fieldRules, setFieldRules] = useState<any>(null);
+  const [fieldRules, setFieldRules] = useState<any>({});
+  const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
   const [isRequired, setIsRequired] = useState(false);
   const [fieldOptions, setFieldOptions] = useState<any[]>([]);
   const [showOptionsConfig, setShowOptionsConfig] = useState(false);
@@ -285,12 +289,36 @@ export function CategoryConfigManager() {
               />
             </div>
             <div>
-              <Label>Giorni non disponibili (separati da virgola, es: 1,15,25 per primo, 15esimo e 25esimo del mese)</Label>
-              <Input
-                placeholder="1,15,25"
-                value={fieldRules?.unavailableDays || ''}
-                onChange={(e) => setFieldRules({ ...fieldRules, unavailableDays: e.target.value })}
-              />
+              <Label className="text-sm font-medium mb-3 block">Seleziona giorni non disponibili</Label>
+              <div className="space-y-4">
+                <Calendar
+                  mode="multiple"
+                  selected={unavailableDates}
+                  onSelect={(dates) => {
+                    setUnavailableDates(dates || []);
+                    // Salva le date come array di stringhe ISO nel formato fieldRules
+                    const dateStrings = (dates || []).map(date => format(date, 'yyyy-MM-dd'));
+                    setFieldRules({ ...fieldRules, unavailableDates: dateStrings });
+                  }}
+                  className={cn("rounded-md border p-3 pointer-events-auto")}
+                  classNames={{
+                    day_selected: "bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground",
+                    day: "h-8 w-8 p-0 font-normal hover:bg-muted rounded-md",
+                  }}
+                />
+                {unavailableDates.length > 0 && (
+                  <div className="text-sm text-muted-foreground">
+                    <p className="font-medium mb-2">Giorni selezionati come non disponibili:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {unavailableDates.map((date, index) => (
+                        <span key={index} className="bg-destructive/10 text-destructive px-2 py-1 rounded text-xs">
+                          {format(date, 'dd/MM/yyyy')}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         );
