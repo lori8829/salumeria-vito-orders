@@ -170,7 +170,7 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <div className="text-sm text-muted-foreground whitespace-nowrap">
-              {formatDate(order.pickup_date)} - {order.pickup_time || 'N/A'}
+              {formatDate(order.pickup_date || order.date)} - {order.pickup_time || 'N/A'}
             </div>
             <div className="font-medium truncate">
               {order.customer_name} {order.customer_surname}
