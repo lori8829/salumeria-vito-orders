@@ -7,6 +7,12 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { CompactOrderCard } from "@/components/CompactOrderCard";
 
+interface OrderFieldValue {
+  field_key: string;
+  field_value: string | null;
+  file_url: string | null;
+}
+
 interface Order {
   id: string;
   created_at: string;
@@ -37,6 +43,11 @@ interface Order {
   print_option: boolean;
   print_type: string;
   print_description: string;
+  category_id: string;
+  field_values?: OrderFieldValue[];
+  category?: {
+    name: string;
+  };
 }
 
 const OrdersWindow = () => {
@@ -82,7 +93,11 @@ const OrdersWindow = () => {
           tiers,
           print_option,
           print_type,
-          print_description
+          print_description,
+          category_id,
+          categories (
+            name
+          )
         `)
         .eq('date', today)
         .neq('status', 'archived')
@@ -92,9 +107,30 @@ const OrdersWindow = () => {
         console.error('Error loading orders:', error);
         toast.error('Errore nel caricamento degli ordini');
         setOrders([]);
-      } else {
-        setOrders(data || []);
+        return;
       }
+
+      // Load field values for each order
+      const ordersWithFieldValues = await Promise.all(
+        (data || []).map(async (order) => {
+          const { data: fieldValues, error: fieldError } = await supabase
+            .from('order_field_values')
+            .select('field_key, field_value, file_url')
+            .eq('order_id', order.id);
+
+          if (fieldError) {
+            console.error('Error loading field values for order:', order.id, fieldError);
+          }
+
+          return {
+            ...order,
+            field_values: fieldValues || [],
+            category: order.categories
+          };
+        })
+      );
+
+      setOrders(ordersWithFieldValues);
     } catch (error) {
       console.error('Error:', error);
       toast.error('Errore nel caricamento degli ordini');
