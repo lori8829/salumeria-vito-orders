@@ -132,76 +132,107 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="font-medium text-muted-foreground">Contatto</p>
-                <p>Tel: {order.customer_phone}</p>
+            {/* Show different details based on order status */}
+            {order.status === 'completed' ? (
+              // Essential info only for completed orders
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="font-medium text-muted-foreground">Cliente</p>
+                  <p>{order.customer_name} {order.customer_surname}</p>
+                </div>
+                
+                <div>
+                  <p className="font-medium text-muted-foreground">Macrocategoria</p>
+                  <p>Torta personalizzata</p>
+                </div>
+                
+                {order.pickup_date && (
+                  <div>
+                    <p className="font-medium text-muted-foreground">Data consegna</p>
+                    <p>{new Date(order.pickup_date).toLocaleDateString('it-IT')}</p>
+                  </div>
+                )}
+
+                {order.people_count && (
+                  <div>
+                    <p className="font-medium text-muted-foreground">Numero persone</p>
+                    <p>{order.people_count}</p>
+                  </div>
+                )}
               </div>
-              
-              {order.pickup_date && (
+            ) : (
+              // Full details for pending/in_preparation/ready orders
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="font-medium text-muted-foreground">Data ritiro</p>
-                  <p>{new Date(order.pickup_date).toLocaleDateString('it-IT')}</p>
+                  <p className="font-medium text-muted-foreground">Contatto</p>
+                  <p>Tel: {order.customer_phone}</p>
                 </div>
-              )}
+                
+                {order.pickup_date && (
+                  <div>
+                    <p className="font-medium text-muted-foreground">Data ritiro</p>
+                    <p>{new Date(order.pickup_date).toLocaleDateString('it-IT')}</p>
+                  </div>
+                )}
 
-              {order.people_count && (
-                <div>
-                  <p className="font-medium text-muted-foreground">Persone</p>
-                  <p>{order.people_count}</p>
-                </div>
-              )}
+                {order.people_count && (
+                  <div>
+                    <p className="font-medium text-muted-foreground">Persone</p>
+                    <p>{order.people_count}</p>
+                  </div>
+                )}
 
-              {order.cake_design && (
-                <div>
-                  <p className="font-medium text-muted-foreground">Cake Design</p>
-                  <p>Sì - {order.tiers} piani</p>
-                </div>
-              )}
+                {order.cake_design && (
+                  <div>
+                    <p className="font-medium text-muted-foreground">Cake Design</p>
+                    <p>Sì - {order.tiers} piani</p>
+                  </div>
+                )}
 
-              {order.allergies && (
-                <div className="md:col-span-2">
-                  <p className="font-medium text-muted-foreground">Allergie</p>
-                  <p>{order.allergies}</p>
-                </div>
-              )}
+                {order.allergies && (
+                  <div className="md:col-span-2">
+                    <p className="font-medium text-muted-foreground">Allergie</p>
+                    <p>{order.allergies}</p>
+                  </div>
+                )}
 
-              {order.inscription && (
-                <div className="md:col-span-2">
-                  <p className="font-medium text-muted-foreground">Scritta</p>
-                  <p>{order.inscription}</p>
-                </div>
-              )}
+                {order.inscription && (
+                  <div className="md:col-span-2">
+                    <p className="font-medium text-muted-foreground">Scritta</p>
+                    <p>{order.inscription}</p>
+                  </div>
+                )}
 
-              {order.decoration_text && (
-                <div className="md:col-span-2">
-                  <p className="font-medium text-muted-foreground">Dettagli decorazione</p>
-                  <p>{order.decoration_text}</p>
-                </div>
-              )}
+                {order.decoration_text && (
+                  <div className="md:col-span-2">
+                    <p className="font-medium text-muted-foreground">Dettagli decorazione</p>
+                    <p>{order.decoration_text}</p>
+                  </div>
+                )}
 
-              {order.print_option && (
-                <div className="md:col-span-2">
-                  <p className="font-medium text-muted-foreground">Stampa</p>
-                  <p>{order.print_type === 'describe' ? `Descrizione: ${order.print_description}` : 'Immagine caricata'}</p>
-                </div>
-              )}
+                {order.print_option && (
+                  <div className="md:col-span-2">
+                    <p className="font-medium text-muted-foreground">Stampa</p>
+                    <p>{order.print_type === 'describe' ? `Descrizione: ${order.print_description}` : 'Immagine caricata'}</p>
+                  </div>
+                )}
 
-              {order.needs_transport && (
-                <div>
-                  <p className="font-medium text-muted-foreground">Trasporto</p>
-                  <p>Richiesto</p>
-                </div>
-              )}
+                {order.needs_transport && (
+                  <div>
+                    <p className="font-medium text-muted-foreground">Trasporto</p>
+                    <p>Richiesto</p>
+                  </div>
+                )}
 
-              {order.is_restaurant && (
-                <div className="md:col-span-2">
-                  <p className="font-medium text-muted-foreground">Ristorante</p>
-                  <p>Consegna: {order.delivery_address}</p>
-                  <p>Referente: {order.restaurant_contact}</p>
-                </div>
-              )}
-            </div>
+                {order.is_restaurant && (
+                  <div className="md:col-span-2">
+                    <p className="font-medium text-muted-foreground">Ristorante</p>
+                    <p>Consegna: {order.delivery_address}</p>
+                    <p>Referente: {order.restaurant_contact}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

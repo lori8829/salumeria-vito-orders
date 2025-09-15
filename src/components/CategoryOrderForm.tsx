@@ -197,7 +197,7 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
         const rules = field.rules;
         
         if (rules && (rules.morningStart || rules.afternoonStart || rules.sundayStart)) {
-          // Generate time slots based on configured rules
+          // Generate specific time slots based on configured rules
           const generateTimeSlots = () => {
             const slots: string[] = [];
             const selectedDate = formData.fieldValues.pickup_date;
@@ -209,16 +209,43 @@ export function CategoryOrderForm({ category, onSubmit, onCancel }: CategoryOrde
               if (dayOfWeek === 0) {
                 // Domenica - solo mattina
                 if (rules.sundayStart && rules.sundayEnd) {
-                  slots.push(`${rules.sundayStart} - ${rules.sundayEnd} (Mattina)`);
+                  const morningSlots = generateSlotsInRange(rules.sundayStart, rules.sundayEnd);
+                  slots.push(...morningSlots);
                 }
               } else {
                 // Lunedì-Sabato - mattina e pomeriggio
                 if (rules.morningStart && rules.morningEnd) {
-                  slots.push(`${rules.morningStart} - ${rules.morningEnd} (Mattina)`);
+                  const morningSlots = generateSlotsInRange(rules.morningStart, rules.morningEnd);
+                  slots.push(...morningSlots);
                 }
                 if (rules.afternoonStart && rules.afternoonEnd) {
-                  slots.push(`${rules.afternoonStart} - ${rules.afternoonEnd} (Pomeriggio)`);
+                  const afternoonSlots = generateSlotsInRange(rules.afternoonStart, rules.afternoonEnd);
+                  slots.push(...afternoonSlots);
                 }
+              }
+            }
+            
+            return slots;
+          };
+
+          // Generate 30-minute time slots within a time range
+          const generateSlotsInRange = (startTime: string, endTime: string) => {
+            const slots: string[] = [];
+            const [startHour, startMinute] = startTime.split(':').map(Number);
+            const [endHour, endMinute] = endTime.split(':').map(Number);
+            
+            let currentHour = startHour;
+            let currentMinute = startMinute;
+            
+            while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
+              const timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+              slots.push(timeString);
+              
+              // Add 30 minutes
+              currentMinute += 30;
+              if (currentMinute >= 60) {
+                currentMinute = 0;
+                currentHour++;
               }
             }
             
