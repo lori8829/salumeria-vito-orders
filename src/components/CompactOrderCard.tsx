@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronUp, Trash2, Archive } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2, Archive, Download, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface OrderFieldValue {
@@ -72,6 +72,28 @@ const statusLabels = {
 
 export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }: CompactOrderCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const isImageFile = (url: string) => {
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+    return imageExtensions.some(ext => url.toLowerCase().includes(ext));
+  };
+
+  const downloadFile = async (url: string, filename?: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename || 'file';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     return statusColors[status as keyof typeof statusColors] || "bg-gray-50 border-gray-200";
@@ -233,20 +255,63 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
                           <p className="font-medium text-muted-foreground capitalize">
                             {getFieldLabel(fieldValue.field_key)}
                           </p>
-                          <p className="break-words">
-                            {fieldValue.file_url ? (
-                              <a 
-                                href={fieldValue.file_url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline"
-                              >
-                                Visualizza file
-                              </a>
-                            ) : (
-                              fieldValue.field_value || 'N/A'
-                            )}
-                          </p>
+                          {fieldValue.file_url ? (
+                            <div className="space-y-2">
+                              {isImageFile(fieldValue.file_url) ? (
+                                <div className="space-y-2">
+                                  <img 
+                                    src={fieldValue.file_url} 
+                                    alt="Immagine caricata dal cliente"
+                                    className="max-w-full h-auto max-h-64 rounded border"
+                                    loading="lazy"
+                                  />
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => window.open(fieldValue.file_url, '_blank')}
+                                      className="flex items-center gap-1"
+                                    >
+                                      <Eye className="h-3 w-3" />
+                                      Visualizza
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => downloadFile(fieldValue.file_url!, `${fieldValue.field_key}-${order.id.slice(0, 8)}`)}
+                                      className="flex items-center gap-1"
+                                    >
+                                      <Download className="h-3 w-3" />
+                                      Scarica
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => window.open(fieldValue.file_url, '_blank')}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <Eye className="h-3 w-3" />
+                                    Visualizza file
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => downloadFile(fieldValue.file_url!, `${fieldValue.field_key}-${order.id.slice(0, 8)}`)}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <Download className="h-3 w-3" />
+                                    Scarica
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="break-words">{fieldValue.field_value || 'N/A'}</p>
+                          )}
                         </div>
                       ))}
                     </div>
