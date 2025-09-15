@@ -64,7 +64,6 @@ export function CategoryConfigManager() {
   const [isRequired, setIsRequired] = useState(false);
   const [fieldOptions, setFieldOptions] = useState<any[]>([]);
   const [showOptionsConfig, setShowOptionsConfig] = useState(false);
-  const [newOptionValue, setNewOptionValue] = useState('');
   const [newOptionLabel, setNewOptionLabel] = useState('');
   
   const { toast } = useToast();
@@ -196,10 +195,9 @@ export function CategoryConfigManager() {
   };
 
   const addFieldOption = () => {
-    if (!newOptionValue || !newOptionLabel) return;
+    if (!newOptionLabel) return;
     
-    setFieldOptions(prev => [...prev, { value: newOptionValue, label: newOptionLabel }]);
-    setNewOptionValue('');
+    setFieldOptions(prev => [...prev, { value: newOptionLabel, label: newOptionLabel }]);
     setNewOptionLabel('');
   };
 
@@ -226,7 +224,6 @@ export function CategoryConfigManager() {
     setIsRequired(false);
     setFieldOptions([]);
     setShowOptionsConfig(false);
-    setNewOptionValue('');
     setNewOptionLabel('');
   };
 
@@ -417,27 +414,17 @@ export function CategoryConfigManager() {
                           <CardTitle className="text-base">Configura Opzioni</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                          <div className="grid grid-cols-2 gap-2">
-                            <div>
-                              <Label>Valore</Label>
-                              <Input
-                                value={newOptionValue}
-                                onChange={(e) => setNewOptionValue(e.target.value)}
-                                placeholder="es. margherita"
-                              />
-                            </div>
-                            <div>
-                              <Label>Etichetta</Label>
-                              <Input
-                                value={newOptionLabel}
-                                onChange={(e) => setNewOptionLabel(e.target.value)}
-                                placeholder="es. Margherita"
-                              />
-                            </div>
+                          <div className="flex gap-2">
+                            <Input
+                              value={newOptionLabel}
+                              onChange={(e) => setNewOptionLabel(e.target.value)}
+                              placeholder="es. Margherita, Sacher, Millefoglie..."
+                              className="flex-1"
+                            />
+                            <Button onClick={addFieldOption} size="sm">
+                              <Plus className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <Button onClick={addFieldOption} size="sm" className="w-full">
-                            Aggiungi Opzione
-                          </Button>
                           
                           {fieldOptions.length > 0 && (
                             <div className="space-y-2">
