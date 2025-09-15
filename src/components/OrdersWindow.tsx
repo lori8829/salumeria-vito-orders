@@ -8,9 +8,11 @@ import { useNavigate } from "react-router-dom";
 import { CompactOrderCard } from "@/components/CompactOrderCard";
 
 interface OrderFieldValue {
+  key: string;
+  value: string;
+  file_url?: string;
   field_key: string;
   field_value: string | null;
-  file_url: string | null;
 }
 
 interface Order {
@@ -43,11 +45,17 @@ interface Order {
   print_option: boolean;
   print_type: string;
   print_description: string;
+  print_image_url?: string;
   category_id: string;
   field_values?: OrderFieldValue[];
   category?: {
     name: string;
   };
+  order_items: Array<{
+    dish_name: string;
+    quantity: number;
+  }>;
+  order_field_values: OrderFieldValue[];
 }
 
 const OrdersWindow = () => {
@@ -94,9 +102,14 @@ const OrdersWindow = () => {
           print_option,
           print_type,
           print_description,
+          print_image_url,
           category_id,
           categories (
             name
+          ),
+          order_items (
+            dish_name,
+            quantity
           )
         `)
         .eq('date', today)
@@ -124,8 +137,22 @@ const OrdersWindow = () => {
 
           return {
             ...order,
-            field_values: fieldValues || [],
-            category: order.categories
+            field_values: (fieldValues || []).map(fv => ({
+              key: fv.field_key,
+              value: fv.field_value || '',
+              file_url: fv.file_url,
+              field_key: fv.field_key,
+              field_value: fv.field_value
+            })),
+            order_field_values: (fieldValues || []).map(fv => ({
+              key: fv.field_key,
+              value: fv.field_value || '',
+              file_url: fv.file_url,
+              field_key: fv.field_key,
+              field_value: fv.field_value
+            })),
+            category: order.categories,
+            order_items: order.order_items || []
           };
         })
       );

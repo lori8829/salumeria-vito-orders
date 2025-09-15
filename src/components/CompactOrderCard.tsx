@@ -4,13 +4,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { ChevronDown, ChevronUp, Trash2, Archive, Download, Eye, Printer, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2, Archive, Download, Eye, Printer, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { printOrder } from "./PrintableOrder";
 
 interface OrderFieldValue {
+  key: string;
+  value: string;
+  file_url?: string;
   field_key: string;
   field_value: string | null;
-  file_url: string | null;
 }
 
 interface Order {
@@ -49,6 +52,11 @@ interface Order {
   category?: {
     name: string;
   };
+  order_items: Array<{
+    dish_name: string;
+    quantity: number;
+  }>;
+  order_field_values: OrderFieldValue[];
 }
 
 interface CompactOrderCardProps {
@@ -225,6 +233,15 @@ export function CompactOrderCard({ order, onStatusChange, onArchive, onDelete }:
             <div className="flex justify-between items-center">
               <Badge variant="outline">#{order.id.slice(0, 8)}</Badge>
               <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => printOrder(order)}
+                  className="text-green-600 hover:text-green-700"
+                  title="Stampa riepilogo ordine"
+                >
+                  <FileText className="h-4 w-4" />
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
