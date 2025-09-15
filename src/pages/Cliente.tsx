@@ -56,7 +56,7 @@ const Cliente = () => {
         category_id: selectedCategory?.id,
         pickup_date: orderData.pickupDate || null,
         pickup_time: orderData.pickupTime || null,
-        status: 'Da contattare',
+        status: 'pending',
         total_items: 1
       };
 
