@@ -140,21 +140,25 @@ const OrdersWindow = () => {
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    console.log('Updating order status:', orderId, newStatus);
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('orders')
         .update({ status: newStatus })
-        .eq('id', orderId);
+        .eq('id', orderId)
+        .select();
 
       if (error) {
-        console.error('Error updating order status:', error);
-        toast.error('Errore nell\'aggiornamento dello stato');
-      } else {
-        toast.success('Stato dell\'ordine aggiornato');
-        loadTodaysOrders();
+        console.error('Supabase error updating order status:', error);
+        toast.error(`Errore nell'aggiornamento dello stato: ${error.message}`);
+        return;
       }
+
+      console.log('Order status updated successfully:', data);
+      toast.success('Stato dell\'ordine aggiornato');
+      loadTodaysOrders();
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Unexpected error:', error);
       toast.error('Errore nell\'aggiornamento dello stato');
     }
   };
