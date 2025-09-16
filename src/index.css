@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Pasticceria del Borgo Design System 
+/* Pasticceria del Borgo - Advanced Design System 
    Palette: Verde menta #68edd1, Rosso #9b271c, Nero #0d0402
-   UI: Card arrotondate, ombre leggere, mobile-first
+   Effects: Glassmorphism, layered transparency, dynamic animations
 */
 
 @layer base {
@@ -14,24 +14,43 @@
     --borgo-red: 6 78% 35%;           /* #9b271c */
     --borgo-dark: 13 89% 1%;          /* #0d0402 */
     
-    /* Semantic Tokens */
-    --background: 0 0% 100%;
+    /* Background System */
+    --background: 45 73% 94%;         /* #fefae0 warm cream */
+    --background-secondary: 45 60% 92%;
+    --background-accent: 45 40% 88%;
     --foreground: 13 89% 1%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 13 89% 1%;
+    /* Glass Morphism System */
+    --glass-primary: 166 71% 67% / 0.1;
+    --glass-secondary: 6 78% 35% / 0.1;
+    --glass-neutral: 0 0% 100% / 0.2;
+    --glass-strong: 0 0% 100% / 0.4;
 
-    --popover: 0 0% 100%;
+    /* Card System */
+    --card: 0 0% 100% / 0.6;
+    --card-hover: 0 0% 100% / 0.8;
+    --card-foreground: 13 89% 1%;
+    --card-border: 166 71% 67% / 0.2;
+
+    --popover: 0 0% 100% / 0.95;
     --popover-foreground: 13 89% 1%;
 
-    --primary: 166 71% 67%;            /* Verde menta */
-    --primary-foreground: 0 0% 100%;
+    /* Primary System */
+    --primary: 166 71% 67%;
+    --primary-light: 166 71% 80%;
+    --primary-dark: 166 71% 50%;
+    --primary-foreground: 13 89% 1%;
+    --primary-glass: 166 71% 67% / 0.2;
 
-    --secondary: 6 78% 35%;            /* Rosso */
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary System */
+    --secondary: 6 78% 35%;
+    --secondary-light: 6 78% 50%;
+    --secondary-dark: 6 78% 25%;
+    --secondary-foreground: 0 0% 98%;
+    --secondary-glass: 6 78% 35% / 0.2;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 45 30% 85%;
+    --muted-foreground: 45 15% 40%;
 
     --accent: 166 71% 67%;
     --accent-foreground: 13 89% 1%;
@@ -39,9 +58,22 @@
     --destructive: 6 78% 35%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
+    /* Border & Input System */
+    --border: 166 71% 67% / 0.3;
+    --border-hover: 166 71% 67% / 0.6;
+    --input: 0 0% 100% / 0.4;
+    --input-focus: 0 0% 100% / 0.7;
     --ring: 166 71% 67%;
+
+    /* Animation Variables */
+    --animation-speed: 0.4s;
+    --animation-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --animation-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* Blur Effects */
+    --blur-light: 10px;
+    --blur-medium: 20px;
+    --blur-strong: 40px;
 
     --chart-1: 166 71% 67%;
     --chart-2: 6 78% 35%;
@@ -49,7 +81,7 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -112,5 +144,124 @@
 
   body {
     @apply bg-background text-foreground;
+    background-image: 
+      radial-gradient(circle at 20% 80%, hsl(var(--primary-glass)) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, hsl(var(--secondary-glass)) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, hsl(var(--glass-neutral)) 0%, transparent 50%);
+    min-height: 100vh;
   }
+}
+
+@layer components {
+  /* Glassmorphism Effects */
+  .glass-card {
+    @apply backdrop-blur-[var(--blur-light)] bg-[hsl(var(--card))] border border-[hsl(var(--card-border))];
+    box-shadow: 
+      0 8px 32px 0 hsl(var(--primary) / 0.1),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.3);
+  }
+
+  .glass-strong {
+    @apply backdrop-blur-[var(--blur-medium)] bg-[hsl(var(--glass-strong))] border border-[hsl(var(--border-hover))];
+    box-shadow: 
+      0 16px 64px 0 hsl(var(--primary) / 0.15),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.4);
+  }
+
+  /* Advanced Animations */
+  .float-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+
+  .morph-hover {
+    transition: all var(--animation-speed) var(--animation-bounce);
+  }
+
+  .morph-hover:hover {
+    transform: scale(1.02) rotate(1deg);
+    filter: brightness(1.1);
+  }
+
+  .slide-in-stagger {
+    animation: slide-in-stagger 0.8s var(--animation-smooth) forwards;
+  }
+
+  .ripple-effect {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ripple-effect::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: hsl(var(--primary) / 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  .ripple-effect:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+
+  /* Layered transparency effects */
+  .layer-1 { @apply bg-[hsl(var(--glass-neutral))] backdrop-blur-[8px]; }
+  .layer-2 { @apply bg-[hsl(var(--glass-primary))] backdrop-blur-[12px]; }
+  .layer-3 { @apply bg-[hsl(var(--glass-secondary))] backdrop-blur-[16px]; }
+}
+
+@layer utilities {
+  /* Custom keyframes */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes pulse-glow {
+    0% { 
+      box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+      filter: brightness(1);
+    }
+    100% { 
+      box-shadow: 0 0 40px hsl(var(--primary) / 0.6);
+      filter: brightness(1.2);
+    }
+  }
+
+  @keyframes slide-in-stagger {
+    0% {
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes morphing-border {
+    0%, 100% { border-radius: 1rem; }
+    25% { border-radius: 1.5rem 1rem 1.5rem 1rem; }
+    50% { border-radius: 1.5rem; }
+    75% { border-radius: 1rem 1.5rem 1rem 1.5rem; }
+  }
+
+  .morphing-border {
+    animation: morphing-border 4s ease-in-out infinite;
+  }
+
+  /* Opacity utilities */
+  .opacity-glass { opacity: 0.8; }
+  .opacity-light { opacity: 0.6; }
+  .opacity-medium { opacity: 0.4; }
+  .opacity-subtle { opacity: 0.2; }
 }
