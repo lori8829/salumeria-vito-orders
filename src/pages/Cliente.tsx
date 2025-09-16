@@ -10,6 +10,7 @@ import { OrderConfirmationDialog } from "@/components/OrderConfirmationDialog";
 import { CustomerProfile } from "@/components/CustomerProfile";
 import { Link } from "react-router-dom";
 import { User as SupabaseUser } from "@supabase/supabase-js";
+import type { CustomerProfile as CustomerProfileType } from "@/types/customer";
 import { 
   Cake, 
   Coffee, 
@@ -32,21 +33,13 @@ interface Category {
   min_lead_days: number;
 }
 
-interface CustomerProfile {
-  id: string;
-  first_name: string;
-  last_name: string;
-  phone: string;
-  email: string | null;
-}
-
 const Cliente = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [customerProfile, setCustomerProfile] = useState<CustomerProfile | null>(null);
+  const [customerProfile, setCustomerProfile] = useState<CustomerProfileType | null>(null);
 
   useEffect(() => {
     loadCategories();
@@ -90,6 +83,14 @@ const Cliente = () => {
     try {
       console.log('Order data received:', orderData);
       
+      // Calculate total items from order data
+      const totalItems = orderData.orderItems?.length || 1;
+      
+      // Validate category exists
+      if (!selectedCategory) {
+        throw new Error('Categoria non selezionata');
+      }
+
       // Insert order with user_id if user is logged in
       const { data: orderResult, error: orderError } = await supabase
         .from('orders')
@@ -100,10 +101,10 @@ const Cliente = () => {
           pickup_date: orderData.pickupDate,
           pickup_time: orderData.pickupTime,
           allergies: orderData.allergies,
-          category_id: selectedCategory?.id,
+          category_id: selectedCategory.id,
           user_id: user?.id || null,
           date: new Date().toISOString().split('T')[0],
-          total_items: 1
+          total_items: totalItems
         })
         .select()
         .single();

@@ -1,40 +1,11 @@
 import React from 'react';
-
-interface OrderFieldValue {
-  key: string;
-  value: string;
-  file_url?: string;
-}
-
-interface Order {
-  id: string;
-  customer_name: string | null;
-  customer_surname: string | null;
-  customer_phone: string | null;
-  pickup_date: string | null;
-  pickup_time: string | null;
-  status: string;
-  created_at: string;
-  category?: {
-    name: string;
-  };
-  order_items: Array<{
-    dish_name: string;
-    quantity: number;
-  }>;
-  order_field_values: OrderFieldValue[];
-  people_count?: number | null;
-  allergies?: string | null;
-  delivery_address?: string | null;
-  needs_transport?: boolean;
-  inscription?: string | null;
-  decoration_text?: string | null;
-  print_description?: string | null;
-}
+import type { Order, OrderFieldValue } from "@/types/order";
 
 interface PrintableOrderProps {
   order: Order;
 }
+
+export const printOrder = (order: Order) => {
 
 export const PrintableOrder: React.FC<PrintableOrderProps> = ({ order }) => {
   const formatDate = (dateString: string | null) => {

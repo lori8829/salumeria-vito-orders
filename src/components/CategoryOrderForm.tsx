@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import type { CustomerProfile } from "@/types/customer";
 
 interface Category {
   id: string;
@@ -29,14 +30,6 @@ interface CategoryField {
   position: number;
   options?: any;
   rules?: any;
-}
-
-interface CustomerProfile {
-  id: string;
-  first_name: string;
-  last_name: string;
-  phone: string;
-  email: string | null;
 }
 
 interface CategoryOrderFormProps {
@@ -145,7 +138,7 @@ export function CategoryOrderForm({ onSubmit, category, customerProfile }: Categ
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate required fields
@@ -161,7 +154,12 @@ export function CategoryOrderForm({ onSubmit, category, customerProfile }: Categ
       }
     }
 
-    onSubmit(formData);
+    try {
+      await onSubmit(formData);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Errore durante l\'invio dell\'ordine');
+    }
   };
 
   const isDateDisabled = (date: Date, field?: CategoryField) => {

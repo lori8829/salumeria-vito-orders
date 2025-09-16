@@ -9,14 +9,7 @@ import { format } from "date-fns";
 import { CalendarIcon, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-
-interface CustomerProfile {
-  id: string;
-  first_name: string;
-  last_name: string;
-  phone: string;
-  email: string | null;
-}
+import type { CustomerProfile } from "@/types/customer";
 
 interface CakeDesignFormProps {
   onSubmit: (orderData: any) => void;
@@ -192,14 +185,22 @@ export function CakeDesignForm({ onSubmit, category, customerProfile }: CakeDesi
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={formData.pickupDate ? new Date(formData.pickupDate) : undefined}
-                onSelect={(date) => handleInputChange('pickupDate', date?.toISOString().split('T')[0])}
-                disabled={isDateDisabled}
-                initialFocus
-                className="pointer-events-auto"
-              />
+                <Calendar
+                  mode="single"
+                  selected={formData.pickupDate ? new Date(formData.pickupDate + 'T00:00:00') : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      const year = date.getFullYear();
+                      const month = String(date.getMonth() + 1).padStart(2, '0');
+                      const day = String(date.getDate()).padStart(2, '0');
+                      const localDateString = `${year}-${month}-${day}`;
+                      handleInputChange('pickupDate', localDateString);
+                    }
+                  }}
+                  disabled={isDateDisabled}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
             </PopoverContent>
           </Popover>
           <p className="text-sm text-muted-foreground mt-1">
