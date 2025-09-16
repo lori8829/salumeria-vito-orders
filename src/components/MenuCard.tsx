@@ -19,23 +19,17 @@ interface MenuCardProps {
 
 export function MenuCard({ item, quantity, onIncrement, onDecrement }: MenuCardProps) {
   return (
-    <Card className="glass-card pulse-glow hover:scale-[1.02] transition-all duration-500 morphing-border group">
-      <CardContent className="p-4 relative overflow-hidden">
-        {/* Background animation layer */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--primary-glass))] to-[hsl(var(--secondary-glass))] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        
-        <div className="flex items-center justify-between relative z-10">
+    <Card className="bg-card shadow-card hover:shadow-elevated transition-all duration-200 border-border">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
           {/* Name and time badge */}
           <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-lg font-semibold text-foreground group-hover:text-primary-foreground transition-colors duration-300">
+              <h3 className="text-lg font-semibold text-foreground">
                 {item.name}
               </h3>
               {item.has_time_restriction && (
-                <Badge 
-                  variant="destructive" 
-                  className="glass-card bg-[hsl(var(--secondary-glass))] text-secondary-foreground text-xs px-2 py-1 backdrop-blur-md animate-pulse"
-                >
+                <Badge variant="destructive" className="bg-destructive text-destructive-foreground text-xs px-2 py-1">
                   ORE 12:00
                 </Badge>
               )}
@@ -43,26 +37,26 @@ export function MenuCard({ item, quantity, onIncrement, onDecrement }: MenuCardP
           </div>
 
           {/* Quantity controls */}
-          <div className="flex items-center gap-3 ml-4">
+          <div className="flex items-center gap-2 ml-4">
             <Button
               size="sm"
-              variant={quantity > 0 ? "floating" : "glass"}
+              variant={quantity > 0 ? "default" : "outline"}
               onClick={onDecrement}
               disabled={quantity === 0}
-              className="h-10 w-10 rounded-full transition-all duration-300 hover:rotate-12"
+              className="h-9 w-9 rounded-full"
             >
               <Minus className="h-4 w-4" />
             </Button>
             
-            <span className="text-xl font-bold min-w-[2.5rem] text-center px-3 py-1 rounded-full glass-card bg-[hsl(var(--glass-strong))] backdrop-blur-md group-hover:scale-110 transition-transform duration-300">
+            <span className="text-lg font-bold min-w-[2rem] text-center">
               {quantity}
             </span>
             
             <Button
               size="sm"
-              variant="ripple"
+              variant="default"
               onClick={onIncrement}
-              className="h-10 w-10 rounded-full transition-all duration-300 hover:-rotate-12"
+              className="h-9 w-9 rounded-full bg-primary hover:bg-primary/90"
             >
               <Plus className="h-4 w-4" />
             </Button>

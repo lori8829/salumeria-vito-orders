@@ -83,62 +83,25 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
+          from: {
+            height: "0",
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
         },
         "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
-        },
-        "float": {
-          "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-10px)" },
-        },
-        "pulse-glow": {
-          "0%": { 
-            boxShadow: "0 0 20px hsl(var(--primary) / 0.3)",
-            filter: "brightness(1)"
+          from: {
+            height: "var(--radix-accordion-content-height)",
           },
-          "100%": { 
-            boxShadow: "0 0 40px hsl(var(--primary) / 0.6)",
-            filter: "brightness(1.2)"
-          },
-        },
-        "slide-in-stagger": {
-          "0%": {
-            opacity: "0",
-            transform: "translateY(30px) scale(0.95)",
-          },
-          "100%": {
-            opacity: "1",
-            transform: "translateY(0) scale(1)",
-          },
-        },
-        "morphing-border": {
-          "0%, 100%": { borderRadius: "1rem" },
-          "25%": { borderRadius: "1.5rem 1rem 1.5rem 1rem" },
-          "50%": { borderRadius: "1.5rem" },
-          "75%": { borderRadius: "1rem 1.5rem 1rem 1.5rem" },
-        },
-        "ripple": {
-          "0%": { 
-            transform: "translate(-50%, -50%) scale(0)",
-            opacity: "0.8"
-          },
-          "100%": { 
-            transform: "translate(-50%, -50%) scale(4)",
-            opacity: "0"
+          to: {
+            height: "0",
           },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "float": "float 6s ease-in-out infinite",
-        "pulse-glow": "pulse-glow 2s ease-in-out infinite alternate",
-        "slide-in-stagger": "slide-in-stagger 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
-        "morphing-border": "morphing-border 4s ease-in-out infinite",
-        "ripple": "ripple 0.6s ease-out",
       },
     },
   },
