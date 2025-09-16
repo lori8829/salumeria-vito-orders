@@ -5,8 +5,6 @@ interface PrintableOrderProps {
   order: Order;
 }
 
-export const printOrder = (order: Order) => {
-
 export const PrintableOrder: React.FC<PrintableOrderProps> = ({ order }) => {
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '';
