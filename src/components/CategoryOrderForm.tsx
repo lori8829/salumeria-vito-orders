@@ -187,15 +187,16 @@ export function CategoryOrderForm({ onSubmit, category, customerProfile }: Categ
     // Use field-specific minLeadDays first, then fallback to category min_lead_days
     const minLeadDays = field?.rules?.minLeadDays ?? category.min_lead_days;
     
-    // If min_lead_days is set, disable dates before today + min_lead_days
+    // If min_lead_days is set, disable dates before today + min_lead_days + 1
     if (minLeadDays > 0) {
       const minAllowedDate = new Date(today);
-      minAllowedDate.setDate(today.getDate() + minLeadDays);
+      minAllowedDate.setDate(today.getDate() + minLeadDays + 1);
       
+      // Disable dates before the minimum allowed date
       if (compareDate < minAllowedDate) return true;
     } else {
-      // If no min_lead_days, at least disable past dates
-      if (compareDate < today) return true;
+      // If no min_lead_days, at least disable past dates and today
+      if (compareDate <= today) return true;
     }
     
     // Check field-specific rules for unavailable dates
