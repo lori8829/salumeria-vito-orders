@@ -24,6 +24,7 @@ import {
   LogIn,
   Sparkles
 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface Category {
   id: string;
@@ -138,7 +139,11 @@ const Cliente = () => {
       
     } catch (error) {
       console.error('Error during order creation:', error);
-      alert('Errore durante la creazione dell\'ordine');
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante la creazione dell'ordine. Riprova.",
+        variant: "destructive",
+      });
     }
   };
 

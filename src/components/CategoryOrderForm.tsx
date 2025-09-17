@@ -12,6 +12,7 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import type { CustomerProfile } from "@/types/customer";
+import { toast } from "@/hooks/use-toast";
 
 interface Category {
   id: string;
@@ -143,13 +144,21 @@ export function CategoryOrderForm({ onSubmit, category, customerProfile }: Categ
     
     // Validate required fields
     if (!formData.customerName || !formData.customerSurname || !formData.customerPhone) {
-      alert('Nome, cognome e telefono sono obbligatori');
+      toast({
+        title: "Campi obbligatori mancanti",
+        description: "Nome, cognome e telefono sono obbligatori",
+        variant: "destructive",
+      });
       return;
     }
 
     for (const field of fields) {
       if (field.is_required && !formData.fieldValues[field.field_key]) {
-        alert(`Il campo ${field.field_label} è obbligatorio`);
+        toast({
+          title: "Campo obbligatorio mancante",
+          description: `Il campo ${field.field_label} è obbligatorio`,
+          variant: "destructive",
+        });
         return;
       }
     }
@@ -158,7 +167,11 @@ export function CategoryOrderForm({ onSubmit, category, customerProfile }: Categ
       await onSubmit(formData);
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('Errore durante l\'invio dell\'ordine');
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante l'invio dell'ordine. Riprova.",
+        variant: "destructive",
+      });
     }
   };
 
