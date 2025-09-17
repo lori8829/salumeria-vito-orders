@@ -38,22 +38,13 @@ export const AdminAuth = ({ onAdminLogin }: AdminAuthProps) => {
         return;
       }
 
-      // For now, we'll just verify the email exists in admin_users
-      // In a real scenario, you'd verify the password hash
-      if (email === "loripiero88@gmail.com") {
-        toast({
-          title: "Accesso riuscito",
-          description: "Benvenuto nell'area admin",
-        });
-        onAdminLogin(true);
-      } else {
-        toast({
-          title: "Accesso negato",
-          description: "Credenziali admin non valide",
-          variant: "destructive",
-        });
-        onAdminLogin(false);
-      }
+      // If email exists in admin_users table, allow login
+      // For now we skip password verification for simplicity
+      toast({
+        title: "Accesso riuscito",
+        description: "Benvenuto nell'area admin",
+      });
+      onAdminLogin(true);
     } catch (error) {
       console.error("Errore durante il login admin:", error);
       toast({
