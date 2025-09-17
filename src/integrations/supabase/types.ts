@@ -19,16 +19,19 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          password_hash: string | null
         }
         Insert: {
           created_at?: string
           email: string
           id?: string
+          password_hash?: string | null
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
+          password_hash?: string | null
         }
         Relationships: []
       }
@@ -359,6 +362,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      authenticate_admin: {
+        Args: { admin_email: string; admin_password: string }
+        Returns: boolean
+      }
       get_current_user_email: {
         Args: Record<PropertyKey, never>
         Returns: string

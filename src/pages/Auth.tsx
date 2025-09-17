@@ -16,14 +16,8 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is already logged in
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/admin");
-      }
-    };
-    checkAuth();
+    // This page is now only for admin access - redirect customer users
+    navigate("/admin");
   }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
