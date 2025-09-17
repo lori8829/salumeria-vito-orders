@@ -199,7 +199,7 @@ export function CakeDesignForm({ onSubmit, category, customerProfile }: CakeDesi
                   }}
                   disabled={isDateDisabled}
                   initialFocus
-                  className="pointer-events-auto"
+                  className={cn("p-3 pointer-events-auto")}
                 />
             </PopoverContent>
           </Popover>
