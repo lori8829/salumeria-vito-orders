@@ -23,12 +23,12 @@ const App = () => (
         <Route path="/auth" element={<Auth />} />
         <Route path="/customer-auth" element={<CustomerAuth />} />
         <Route path="/admin" element={
-          <ProtectedRoute>
+          <ProtectedRoute requireAdmin={true}>
             <Admin />
           </ProtectedRoute>
         } />
         <Route path="/archived-orders" element={
-          <ProtectedRoute>
+          <ProtectedRoute requireAdmin={true}>
             <ArchivedOrders />
           </ProtectedRoute>
         } />
