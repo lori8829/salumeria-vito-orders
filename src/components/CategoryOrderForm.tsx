@@ -167,9 +167,10 @@ export function CategoryOrderForm({ onSubmit, category, customerProfile }: Categ
       await onSubmit(formData);
     } catch (error) {
       console.error('Error submitting form:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Errore sconosciuto';
       toast({
-        title: "Errore",
-        description: "Si è verificato un errore durante l'invio dell'ordine. Riprova.",
+        title: "Errore nella validazione",
+        description: `${errorMessage}. Controlla i dati inseriti e riprova.`,
         variant: "destructive",
       });
     }

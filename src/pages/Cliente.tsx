@@ -139,9 +139,10 @@ const Cliente = () => {
       
     } catch (error) {
       console.error('Error during order creation:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Errore sconosciuto';
       toast({
-        title: "Errore",
-        description: "Si è verificato un errore durante la creazione dell'ordine. Riprova.",
+        title: "Errore nell'invio dell'ordine",
+        description: `${errorMessage}. Riprova o contatta l'assistenza.`,
         variant: "destructive",
       });
     }
