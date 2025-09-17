@@ -105,7 +105,8 @@ const Cliente = () => {
           category_id: selectedCategory.id,
           user_id: user?.id || null,
           date: new Date().toISOString().split('T')[0],
-          total_items: totalItems
+          total_items: totalItems,
+          status: 'Ricevuto'
         })
         .select()
         .single();
