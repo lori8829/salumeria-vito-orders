@@ -28,7 +28,7 @@ export const AdminAuth = ({ onAdminLogin }: AdminAuthProps) => {
         .eq('email', email)
         .single();
 
-      if (!adminUser) {
+      if (!adminUser || adminUser.email !== email) {
         toast({
           title: "Accesso negato",
           description: "Credenziali admin non valide",
@@ -38,7 +38,7 @@ export const AdminAuth = ({ onAdminLogin }: AdminAuthProps) => {
         return;
       }
 
-      // If email exists in admin_users table, allow login
+      // If email exists in admin_users table and matches input, allow login
       // For now we skip password verification for simplicity
       toast({
         title: "Accesso riuscito",
