@@ -5,10 +5,9 @@ import { User } from "@supabase/supabase-js";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requireAdmin?: boolean;
 }
 
-export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -19,7 +18,7 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       
-      if (currentUser && requireAdmin) {
+      if (currentUser?.email) {
         // Check if user is admin
         const { data: adminCheck } = await supabase
           .from('admin_users')
@@ -40,7 +39,7 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
         const currentUser = session?.user ?? null;
         setUser(currentUser);
         
-        if (currentUser && requireAdmin) {
+        if (currentUser?.email) {
           // Check if user is admin
           const { data: adminCheck } = await supabase
             .from('admin_users')
@@ -58,7 +57,7 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
     );
 
     return () => subscription.unsubscribe();
-  }, [requireAdmin]);
+  }, []);
 
   if (loading) {
     return (
@@ -75,7 +74,7 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
     return <Navigate to="/auth" replace />;
   }
 
-  if (requireAdmin && !isAdmin) {
+  if (!isAdmin) {
     return <Navigate to="/auth" replace />;
   }
 
