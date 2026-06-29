@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -58,6 +58,27 @@ const SELECT_OPTIONS = {
   ]
 };
 
+const COMMON_OPTION_WORDS = new Set([
+  'a',
+  'al',
+  'alla',
+  'alle',
+  'allo',
+  'con',
+  'da',
+  'dal',
+  'dalla',
+  'delle',
+  'di',
+  'e',
+  'il',
+  'in',
+  'la',
+  'le',
+  'lo',
+  'per',
+]);
+
 export function CategoryConfigManager() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -71,6 +92,45 @@ export function CategoryConfigManager() {
   const [newOptionLabel, setNewOptionLabel] = useState('');
   
   const { toast } = useToast();
+
+  const currentOptionWord = newOptionLabel.match(/([A-Za-zÀ-ÖØ-öø-ÿ0-9']+)$/)?.[1] || '';
+
+  const optionWordSuggestions = useMemo(() => {
+    if (currentOptionWord.length < 2) return [];
+
+    const currentWord = currentOptionWord.toLowerCase();
+    const suggestionsByKey = new Map<string, string>();
+
+    fieldOptions.forEach((option) => {
+      const label = String(option.label || option.value || '');
+      label
+        .split(/[^A-Za-zÀ-ÖØ-öø-ÿ0-9']+/)
+        .filter(Boolean)
+        .forEach((word) => {
+          const normalizedWord = word.toLowerCase();
+          if (
+            word.length < 2 ||
+            /^\d+$/.test(word) ||
+            COMMON_OPTION_WORDS.has(normalizedWord) ||
+            !normalizedWord.startsWith(currentWord) ||
+            normalizedWord === currentWord
+          ) {
+            return;
+          }
+
+          if (!suggestionsByKey.has(normalizedWord)) {
+            suggestionsByKey.set(normalizedWord, word);
+          }
+        });
+    });
+
+    return Array.from(suggestionsByKey.values()).slice(0, 6);
+  }, [currentOptionWord, fieldOptions]);
+
+  const applyOptionWordSuggestion = (suggestion: string) => {
+    const nextLabel = newOptionLabel.replace(/([A-Za-zÀ-ÖØ-öø-ÿ0-9']+)$/, suggestion);
+    setNewOptionLabel(nextLabel);
+  };
 
   useEffect(() => {
     loadCategories();
@@ -627,12 +687,33 @@ export function CategoryConfigManager() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div className="flex gap-2">
-                            <Input
-                              value={newOptionLabel}
-                              onChange={(e) => setNewOptionLabel(e.target.value)}
-                              placeholder="es. Margherita, Sacher, Millefoglie..."
-                              className="flex-1"
-                            />
+                            <div className="relative flex-1">
+                              <Input
+                                value={newOptionLabel}
+                                onChange={(e) => setNewOptionLabel(e.target.value)}
+                                placeholder="es. Margherita, Sacher, Millefoglie..."
+                                className="w-full"
+                                autoComplete="off"
+                                name={`option-${selectedFieldKey}-${fieldOptions.length}`}
+                              />
+                              {optionWordSuggestions.length > 0 && (
+                                <div className="absolute left-0 right-0 top-full z-20 mt-1 rounded-md border bg-background p-1 shadow-lg">
+                                  {optionWordSuggestions.map((suggestion) => (
+                                    <button
+                                      key={suggestion}
+                                      type="button"
+                                      className="block w-full rounded-sm px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+                                      onMouseDown={(event) => {
+                                        event.preventDefault();
+                                        applyOptionWordSuggestion(suggestion);
+                                      }}
+                                    >
+                                      {suggestion}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                             <Button onClick={addFieldOption} size="sm">
                               <Plus className="h-4 w-4" />
                             </Button>
